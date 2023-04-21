@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.vdo.KoreahanaVdo">
+		
+	<sql id="KoreahanaVdoWhere">
+		<include refid="exts.mapper.koreahana.spr.KoreahanaSpr.KoreahanaSprComWhere"/>
+	</sql>
+	<sql id="KoreahanaVdoColumn">
+		s.SPRT_SN	sprtSn		,
+		FN_CRYPTO_DEC(s.FLNM,'${scrKey}')		flnm		,
+		s.GENDER_CD	genderCd	,
+		FN_CRYPTO_DEC(s.BRDT_YMD,'${scrKey}')	brdtYmd		,
+		FN_CRYPTO_DEC(s.MBPHNO,'${scrKey}')		mbphno		,
+		FN_CRYPTO_DEC(s.ZIP,'${scrKey}')		zip		,
+		FN_CRYPTO_DEC(s.ADDR,'${scrKey}')		addr		,
+		FN_CRYPTO_DEC(s.DADDR,'${scrKey}')		daddr		,
+		s.SPRT_STTS_CD		sprtSttsCd		,
+		s.RSN		rsn		,
+		s.RGTR_ID             rgtrId  ,
+		s.MDFR_ID            mdfrId ,
+		s.REG_DT                regDt    ,
+		s.MDFCN_DT               mdfcnDt   ,
+		s.DEL_YN                  delYn   ,
+        
+        p.PBANCRC_SN		pbancrcSn		,
+		p.PBANCRC_CTGRY_FRST_CD		pbancrcCtgryFrstCd		,
+		p.BIZ_SE_CD       bizSeCd    ,
+		p.RLS_YN          rlsYn      ,
+		p.PBANCRC_NM		pbancrcNm		,
+		p.PBANCRC_CN		pbancrcCn		,
+		p.INQ_CNT		inqCnt		,
+		p.PBANCRC_BGNG_DT		pbancrcBgngDt ,
+		p.PBANCRC_END_DT		pbancrcEndDt ,
+		FN_GET_PBANCRC_STTS(p.PBANCRC_BGNG_DT, p.PBANCRC_END_DT) pbancrcSttsCd ,
+	
+		FN_CRYPTO_DEC(ma.NTKRDF_UNQ_NO,'${scrKey}')		ntkrdfUnqNo ,
+		ma.HANAWON_TH		hanawonTh		,
+		ma.ENTCNY_YMD			entcnyYmd	,
+		ma.PRTDCS_YMD			prtdcsYmd	,
+		ma.HANAWON_FNSH_YMD	hanawonFnshYmd	,
+	
+		ve.APLCNT_TYPE		aplcntType		,
+		ve.BRPLC_CD		brplcCd		,
+		ve.EXIST_BNF_CD		existBnfCd		,
+		ve.RCOBL_YN		rcoblYn		,
+		ve.RCOBL_SGNT_FILE_SN		rcoblSgntFileSn		,
+		ve.APLCNT_OGDP		aplcntOgdp		,
+		ve.NTKRDF_SE		ntkrdfSe		,
+		FN_CRYPTO_DEC(ve.NTKRDF_FLNM,'${scrKey}')		ntkrdfFlnm		,
+		ve.NTKRDF_HANAWON_TH		ntkrdfHanawonTh		,
+		ve.NTKRDF_ENTCNY_YR		ntkrdfEntcnyYr		,
+		ve.NTKRDF_ACRTFCT_FILE_SN		ntkrdfAcrtfctFileSn		,
+		ve.EDU_SPRT_TRPR_REL_CD		eduSprtTrprRelCd		,
+		ve.EDU_SPRT_TRPR_REL_DTL		eduSprtTrprRelDtl		,
+		FN_CRYPTO_DEC(ve.PRTCR_FLNM,'${scrKey}')		prtcrFlnm		,
+		ve.PRTCR_GENDER_CD		prtcrGenderCd		,
+		FN_CRYPTO_DEC(ve.PRTCR_BRDT_YMD,'${scrKey}')		prtcrBrdtYmd		,
+		FN_CRYPTO_DEC(ve.PRTCR_MBPHNO,'${scrKey}')		prtcrMbphno		,
+		FN_CRYPTO_DEC(ve.PRTCR_ZIP,'${scrKey}')		prtcrZip		,
+		FN_CRYPTO_DEC(ve.PRTCR_ADDR,'${scrKey}')		prtcrAddr		,
+		FN_CRYPTO_DEC(ve.PRTCR_DADDR,'${scrKey}')		prtcrDaddr		,
+		ve.SGNT_FILE_SN		sgntFileSn		,
+		FN_CRYPTO_DEC(ve.SGNTR_FLNM,'${scrKey}')		sgntrFlnm		,
+		ve.PRTCR_SGNT_FILE_SN		prtcrSgntFileSn		,
+		FN_CRYPTO_DEC(ve.PRTCR_SGNTR_FLNM,'${scrKey}')		prtcrSgntrFlnm
+	</sql>
+	<sql id="KoreahanaVdoTable">
+	    TB_SPRT s 
+	    LEFT JOIN TB_VDOENG_EDU ve ON (s.SPRT_SN = ve.SPRT_SN)
+	    INNER JOIN TB_PBANCRC p ON (p.PBANCRC_SN = s.PBANCRC_SN AND p.DEL_YN = 'N')
+	    LEFT JOIN TB_MBR_ADTIFM ma ON (s.RGTR_ID = ma.MBR_ID)
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.vdo.vo.KoreahanaVdoVO" resultType="exts.koreahana.vdo.vo.KoreahanaVdoVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaVdoColumn"/>
+				FROM
+					<include refid="KoreahanaVdoTable"/>
+				<include refid="KoreahanaVdoWhere"/>
+				ORDER BY
+					s.SPRT_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.vdo.vo.KoreahanaVdoVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaVdoTable"/>
+		<include refid="KoreahanaVdoWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.vdo.vo.KoreahanaVdoVO" resultType="exts.koreahana.vdo.vo.KoreahanaVdoVO">
+		SELECT
+			<include refid="KoreahanaVdoColumn"/>
+		FROM
+			<include refid="KoreahanaVdoTable"/>
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_SN = #{sprtSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.vdo.vo.KoreahanaVdoVO">
+		INSERT INTO TB_VDOENG_EDU (
+			SPRT_SN		,
+			APLCNT_TYPE		,
+			BRPLC_CD		,
+			EXIST_BNF_CD		,
+			RCOBL_YN		,
+			RCOBL_SGNT_FILE_SN		,
+			APLCNT_OGDP		,
+			NTKRDF_SE		,
+			NTKRDF_FLNM		,
+			NTKRDF_HANAWON_TH		,
+			NTKRDF_ENTCNY_YR		,
+			NTKRDF_ACRTFCT_FILE_SN		,
+			EDU_SPRT_TRPR_REL_CD		,
+			EDU_SPRT_TRPR_REL_DTL		,
+			PRTCR_FLNM		,
+			PRTCR_GENDER_CD		,
+			PRTCR_BRDT_YMD		,
+			PRTCR_MBPHNO		,
+			PRTCR_ZIP		,
+			PRTCR_ADDR		,
+			PRTCR_DADDR		,
+			SGNT_FILE_SN		,
+			SGNTR_FLNM		,
+			PRTCR_SGNT_FILE_SN		,
+			PRTCR_SGNTR_FLNM
+		) VALUES (
+			#{sprtSn}		,
+			#{aplcntType}		,
+			#{brplcCd}		,
+			#{existBnfCd}		,
+			#{rcoblYn}		,
+			#{rcoblSgntFileSn}		,
+			#{aplcntOgdp}		,
+			#{ntkrdfSe}		,
+			FN_CRYPTO_ENC(#{ntkrdfFlnm},'${scrKey}')		,
+			#{ntkrdfHanawonTh}		,
+			#{ntkrdfEntcnyYr}		,
+			#{ntkrdfAcrtfctFileSn}		,
+			#{eduSprtTrprRelCd}		,
+			#{eduSprtTrprRelDtl}		,
+			FN_CRYPTO_ENC(#{prtcrFlnm},'${scrKey}')		,
+			#{prtcrGenderCd}		,
+			FN_CRYPTO_ENC(REPLACE(#{prtcrBrdtYmd}, '-', ''),'${scrKey}')		,
+			FN_CRYPTO_ENC(#{prtcrMbphno},'${scrKey}')		,
+			FN_CRYPTO_ENC(#{prtcrZip},'${scrKey}')		,
+			FN_CRYPTO_ENC(#{prtcrAddr},'${scrKey}')		,
+			FN_CRYPTO_ENC(#{prtcrDaddr},'${scrKey}')		,
+			#{sgntFileSn}		,
+			FN_CRYPTO_ENC(#{sgntrFlnm},'${scrKey}')		,
+			#{prtcrSgntFileSn}		,
+			FN_CRYPTO_ENC(#{prtcrSgntrFlnm},'${scrKey}')
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.vdo.vo.KoreahanaVdoVO">
+		UPDATE 
+			TB_VDOENG_EDU
+		SET
+			BRPLC_CD	=	#{brplcCd}		,
+			EXIST_BNF_CD	=	#{existBnfCd}		,
+			RCOBL_YN	=	#{rcoblYn}		,
+			RCOBL_SGNT_FILE_SN	=	#{rcoblSgntFileSn}		,
+			APLCNT_OGDP	=	#{aplcntOgdp}		,
+			NTKRDF_SE	=	#{ntkrdfSe}		,
+			NTKRDF_FLNM	=	FN_CRYPTO_ENC(#{ntkrdfFlnm},'${scrKey}')		,
+			NTKRDF_HANAWON_TH	=	#{ntkrdfHanawonTh}		,
+			NTKRDF_ENTCNY_YR	=	#{ntkrdfEntcnyYr}		,
+			NTKRDF_ACRTFCT_FILE_SN	=	#{ntkrdfAcrtfctFileSn}		,
+			EDU_SPRT_TRPR_REL_CD	=	#{eduSprtTrprRelCd}		,
+			EDU_SPRT_TRPR_REL_DTL	=	#{eduSprtTrprRelDtl}		,
+			PRTCR_FLNM	=	FN_CRYPTO_ENC(#{prtcrFlnm},'${scrKey}')		,
+			PRTCR_GENDER_CD	=	FN_CRYPTO_ENC(#{prtcrGenderCd},'${scrKey}')		,
+			PRTCR_BRDT_YMD	=	FN_CRYPTO_ENC(REPLACE(#{prtcrBrdtYmd}, '-', ''),'${scrKey}')		,
+			PRTCR_MBPHNO	=	FN_CRYPTO_ENC(#{prtcrMbphno},'${scrKey}')		,
+			PRTCR_ZIP	=	FN_CRYPTO_ENC(#{prtcrZip},'${scrKey}')		,
+			PRTCR_ADDR	=	FN_CRYPTO_ENC(#{prtcrAddr},'${scrKey}')		,
+			PRTCR_DADDR	=	FN_CRYPTO_ENC(#{prtcrDaddr},'${scrKey}')		,
+			SGNT_FILE_SN	=	#{sgntFileSn}		,
+			SGNTR_FLNM	=	FN_CRYPTO_ENC(#{sgntrFlnm},'${scrKey}')		,
+			PRTCR_SGNT_FILE_SN	=	#{prtcrSgntFileSn}		,
+			PRTCR_SGNTR_FLNM	=	FN_CRYPTO_ENC(#{prtcrSgntrFlnm},'${scrKey}')
+		WHERE
+			1 = 1
+			AND SPRT_SN = #{sprtSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.vdo.vo.KoreahanaVdoVO">
+		DELETE FROM
+			TB_VDOENG_EDU
+		WHERE
+			SPRT_SN = #{sprtSn}
+	</update>
+	
+	<select id="selectListExcel" parameterType="exts.koreahana.vdo.vo.KoreahanaVdoVO" resultType="exts.koreahana.vdo.vo.KoreahanaVdoExcelVO">
+		SELECT
+			<include refid="KoreahanaVdoColumn"/>
+		FROM
+			<include refid="KoreahanaVdoTable"/>
+		<include refid="KoreahanaVdoWhere"/>
+		ORDER BY
+			s.SPRT_SN DESC
+	</select>
+	
+</mapper>

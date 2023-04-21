@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.mgm.KoreahanaMgm">
+		
+	<sql id="KoreahanaMgmWhere">
+		WHERE
+			DEL_YN = 'N'
+		<if test='sprtYr != null and !sprtYr.equals("")'>
+			AND SPRT_YR = #{sprtYr}
+		</if>
+		<if test='flnm != null and !flnm.equals("")'>
+			AND FLNM = FN_CRYPTO_ENC(#{flnm},'${scrKey}')
+		</if>
+		<if test='brdtYmd != null and !brdtYmd.equals("")'>
+			AND BRDT_YMD = FN_CRYPTO_ENC(#{brdtYmd},'${scrKey}')
+		</if>
+		<if test='hnwCycl != null and !hnwCycl.equals("")'>
+			AND HNW_CYCL = #{hnwCycl}
+		</if>
+		<if test='rcmtFldCd != null and !rcmtFldCd.equals("")'>
+			AND RCMT_FLD_CD = #{rcmtFldCd}
+		</if>
+		<if test='bzstatCd != null and !bzstatCd.equals("")'>
+			AND BZSTAT_CD = #{bzstatCd}
+		</if>
+		<!--
+		<if test='rrnoBknb != null and !rrnoBknb.equals("")'>
+			AND RRNO_BKNB = #{rrnoBknb}
+		</if>
+		<if test='mbphno != null and !mbphno.equals("")'>
+			AND MBPHNO = #{mbphno}
+		</if>
+		<if test='conm != null and !conm.equals("")'>
+			AND CONM = #{conm}
+		</if>
+		<if test='bzstatCd != null and !bzstatCd.equals("")'>
+			AND BZSTAT_CD = #{bzstatCd}
+		</if>
+		<if test='bzstatOsd != null and !bzstatOsd.equals("")'>
+			AND BZSTAT_OSD = #{bzstatOsd}
+		</if>
+		<if test='tpbizNm != null and !tpbizNm.equals("")'>
+			AND TPBIZ_NM = #{tpbizNm}
+		</if>
+		<if test='brno != null and !brno.equals("")'>
+			AND BRNO = #{brno}
+		</if>
+		<if test='bizStartYmd != null and !bizStartYmd.equals("")'>
+			AND BIZ_START_YMD = #{bizStartYmd}
+		</if>
+		<if test='addr != null and !addr.equals("")'>
+			AND ADDR = #{addr}
+		</if>
+		<if test='carmdlCd != null and !carmdlCd.equals("")'>
+			AND CARMDL_CD = #{carmdlCd}
+		</if>
+		<if test='mlg != null and !mlg.equals("")'>
+			AND MLG = #{mlg}
+		</if>
+		<if test='vhclMdyr != null and !vhclMdyr.equals("")'>
+			AND VHCL_MDYR = #{vhclMdyr}
+		</if>
+		<if test='rcmtFldCd != null and !rcmtFldCd.equals("")'>
+			AND RCMT_FLD_CD = #{rcmtFldCd}
+		</if>
+		<if test='dcsnAmt != null and !dcsnAmt.equals("")'>
+			AND DCSN_AMT = #{dcsnAmt}
+		</if>
+		<if test='prchsDsctn != null and !prchsDsctn.equals("")'>
+			AND PRCHS_DSCTN = #{prchsDsctn}
+		</if>
+		<if test='prchsAmt != null and !prchsAmt.equals("")'>
+			AND PRCHS_AMT = #{prchsAmt}
+		</if>
+		<if test='giveAmt != null and !giveAmt.equals("")'>
+			AND GIVE_AMT = #{giveAmt}
+		</if>
+		<if test='giveCycl != null and !giveCycl.equals("")'>
+			AND GIVE_CYCL = #{giveCycl}
+		</if>
+		<if test='rmrk != null and !rmrk.equals("")'>
+			AND RMRK = #{rmrk}
+		</if>
+		<if test='sprtSttsCd != null and !sprtSttsCd.equals("")'>
+			AND SPRT_STTS_CD = #{sprtSttsCd}
+		</if>
+		<if test='rsn != null and !rsn.equals("")'>
+			AND RSN = #{rsn}
+		</if>
+
+		-->
+		
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>	<!-- 전체 -->
+					AND FLNM = FN_CRYPTO_ENC(#{searchKeyword},'${scrKey}')
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaMgmColumn">
+		MGMIPV_AMT_SPRT_SN		mgmipvAmtSprtSn		,
+		FN_CRYPTO_DEC(FLNM,'${scrKey}')		flnm		,
+		FN_CRYPTO_DEC(BRDT_YMD,'${scrKey}')		brdtYmd		,
+		RRNO_BKNB		rrnoBknb		,
+		HNW_CYCL		hnwCycl		,
+		FN_CRYPTO_DEC(MBPHNO,'${scrKey}')		mbphno		,
+		CONM		conm		,
+		BZSTAT_CD		bzstatCd		,
+		BZSTAT_OSD		bzstatOsd		,
+		TPBIZ_NM		tpbizNm		,
+		BRNO		brno		,
+		BIZ_START_YMD		bizStartYmd		,
+		FN_CRYPTO_DEC(ADDR,'${scrKey}')		addr		,
+		CARMDL_CD		carmdlCd		,
+		MLG		mlg		,
+		VHCL_MDYR		vhclMdyr		,
+		RCMT_FLD_CD		rcmtFldCd		,
+		SPRT_YR		sprtYr		,
+		DCSN_AMT		dcsnAmt		,
+		PRCHS_DSCTN		prchsDsctn		,
+		PRCHS_AMT		prchsAmt		,
+		GIVE_AMT		giveAmt		,
+		GIVE_CYCL		giveCycl		,
+		RMRK		rmrk		,
+		SPRT_STTS_CD		sprtSttsCd		,
+		RSN		rsn		,
+
+		RGTR_ID             rgtrId  ,
+		MDFR_ID            mdfrId ,
+		REG_DT                regDt    ,
+		MDFCN_DT               mdfcnDt   ,
+		DEL_YN                  delYn 
+	</sql>
+	<sql id="KoreahanaMgmTable">
+	    TB_MGMIPV_AMT_SPRT
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.mgm.vo.KoreahanaMgmVO" resultType="exts.koreahana.mgm.vo.KoreahanaMgmVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaMgmColumn"/>
+				FROM
+					<include refid="KoreahanaMgmTable"/>
+				<include refid="KoreahanaMgmWhere"/>
+				ORDER BY
+					MGMIPV_AMT_SPRT_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.mgm.vo.KoreahanaMgmVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaMgmTable"/>
+		<include refid="KoreahanaMgmWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.mgm.vo.KoreahanaMgmVO" resultType="exts.koreahana.mgm.vo.KoreahanaMgmVO">
+		SELECT
+			<include refid="KoreahanaMgmColumn"/>
+		FROM
+			<include refid="KoreahanaMgmTable"/>
+		WHERE
+			DEL_YN = 'N'
+			AND MGMIPV_AMT_SPRT_SN = #{mgmipvAmtSprtSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.mgm.vo.KoreahanaMgmVO">
+		<selectKey resultType="string" keyProperty="mgmipvAmtSprtSn" order="BEFORE">
+			SELECT SEQ_TB_MGMIPV_AMT_SPRT.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_MGMIPV_AMT_SPRT (
+			MGMIPV_AMT_SPRT_SN		,
+			FLNM		,
+			BRDT_YMD		,
+			RRNO_BKNB		,
+			HNW_CYCL		,
+			MBPHNO		,
+			CONM		,
+			BZSTAT_CD		,
+			BZSTAT_OSD		,
+			TPBIZ_NM		,
+			BRNO		,
+			BIZ_START_YMD		,
+			ADDR		,
+			CARMDL_CD		,
+			MLG		,
+			VHCL_MDYR		,
+			RCMT_FLD_CD		,
+			SPRT_YR		,
+			DCSN_AMT		,
+			PRCHS_DSCTN		,
+			PRCHS_AMT		,
+			GIVE_AMT		,
+			GIVE_CYCL		,
+			RMRK		,
+			SPRT_STTS_CD		,
+			RSN		,
+
+			RGTR_ID     ,
+			MDFR_ID       ,
+			REG_DT        ,
+			MDFCN_DT        ,
+			DEL_YN
+		) VALUES (
+			#{mgmipvAmtSprtSn}		,
+			FN_CRYPTO_ENC(#{flnm},'${scrKey}')		,
+			FN_CRYPTO_ENC(REPLACE(REPLACE(#{brdtYmd},'-',''),'.',''),'${scrKey}')		,
+			#{rrnoBknb}		,
+			#{hnwCycl}		,
+			FN_CRYPTO_ENC(#{mbphno},'${scrKey}')		,
+			#{conm}		,
+			#{bzstatCd}		,
+			#{bzstatOsd}		,
+			#{tpbizNm}		,
+			REPLACE(REPLACE(#{brno},'-',''),'.','')		,
+			REPLACE(REPLACE(#{bizStartYmd},'-',''),'.','')		,
+			FN_CRYPTO_ENC(#{addr},'${scrKey}')		,
+			#{carmdlCd}		,
+			#{mlg}		,
+			#{vhclMdyr}		,
+			#{rcmtFldCd}		,
+			#{sprtYr}		,
+			#{dcsnAmt}		,
+			#{prchsDsctn}		,
+			#{prchsAmt}		,
+			#{giveAmt}		,
+			#{giveCycl}		,
+			#{rmrk}		,
+			#{sprtSttsCd}		,
+			#{rsn}		,
+
+			#{rgtrId}   ,
+			#{mdfrId}     ,
+			SYSDATE     ,
+			SYSDATE     ,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.mgm.vo.KoreahanaMgmVO">
+		UPDATE 
+			TB_MGMIPV_AMT_SPRT
+		SET
+			FLNM	=	FN_CRYPTO_ENC(#{flnm},'${scrKey}')		,
+			BRDT_YMD	=	FN_CRYPTO_ENC(REPLACE(REPLACE(#{brdtYmd},'-',''),'.',''),'${scrKey}')		,
+			RRNO_BKNB	=	#{rrnoBknb}		,
+			HNW_CYCL	=	#{hnwCycl}		,
+			MBPHNO	=	FN_CRYPTO_ENC(#{mbphno},'${scrKey}')		,
+			CONM	=	#{conm}		,
+			BZSTAT_CD	=	#{bzstatCd}		,
+			BZSTAT_OSD	=	#{bzstatOsd}		,
+			TPBIZ_NM	=	#{tpbizNm}		,
+			BRNO	=	REPLACE(REPLACE(#{brno},'-',''),'.','')		,
+			BIZ_START_YMD	=	REPLACE(REPLACE(#{bizStartYmd},'-',''),'.','')		,
+			ADDR	=	FN_CRYPTO_ENC(#{addr},'${scrKey}')		,
+			CARMDL_CD	=	#{carmdlCd}		,
+			MLG	=	#{mlg}		,
+			VHCL_MDYR	=	#{vhclMdyr}		,
+			RCMT_FLD_CD	=	#{rcmtFldCd}		,
+			SPRT_YR	=	#{sprtYr}		,
+			DCSN_AMT	=	#{dcsnAmt}		,
+			PRCHS_DSCTN	=	#{prchsDsctn}		,
+			PRCHS_AMT	=	#{prchsAmt}		,
+			GIVE_AMT	=	#{giveAmt}		,
+			GIVE_CYCL	=	#{giveCycl}		,
+			RMRK	=	#{rmrk}		,
+			SPRT_STTS_CD	=	#{sprtSttsCd}		,
+			RSN	=	#{rsn}		,
+
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND MGMIPV_AMT_SPRT_SN = #{mgmipvAmtSprtSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.mgm.vo.KoreahanaMgmVO">
+		UPDATE
+			TB_MGMIPV_AMT_SPRT
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND MGMIPV_AMT_SPRT_SN = #{mgmipvAmtSprtSn}
+	</update>	
+	
+	<select id="selectStatisticRcmtFldCd" parameterType="exts.koreahana.mdl.vo.KoreahanaMdlVO" resultType="egovMap">
+		SELECT
+			COUNT(*) CNT,
+			SUM(GIVE_AMT) AMT,
+			RCMT_FLD_CD
+		FROM
+			TB_MGMIPV_AMT_SPRT
+		WHERE
+			DEL_YN = 'N'
+		<if test='sprtYr != null and !sprtYr.equals("")'>
+			AND SPRT_YR = #{sprtYr}
+		</if>
+		GROUP BY
+			ROLLUP(RCMT_FLD_CD)
+	</select>	
+	
+	
+	<select id="selectStatisticSprtYr" parameterType="exts.koreahana.mdl.vo.KoreahanaMdlVO" resultType="egovMap">
+		SELECT
+			COUNT(*) CNT,
+			SUM(GIVE_AMT) AMT,
+			SPRT_YR
+		FROM
+			TB_MGMIPV_AMT_SPRT
+		WHERE
+			DEL_YN = 'N'
+		GROUP BY
+			ROLLUP(SPRT_YR)
+		ORDER BY
+			SPRT_YR
+	</select>
+</mapper>

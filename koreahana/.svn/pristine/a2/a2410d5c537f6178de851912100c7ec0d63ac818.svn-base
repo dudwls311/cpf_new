@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.com.ComAtchFile">
+		
+	<sql id="ComAtchFileWhere">
+		WHERE
+			DEL_YN = 'N'
+			<if test='atchFileSnList != null'>
+				<foreach open="AND ATCH_FILE_SN IN (" close=")" item="item" index="index" collection="atchFileSnList" separator=",">
+					#{item}
+				</foreach>
+			</if>
+		<!--
+		<if test='orgnlAtchFileNm != null and !orgnlAtchFileNm.equals("")'>
+			AND ORGNL_ATCH_FILE_NM = #{orgnlAtchFileNm}
+		</if>
+		<if test='atchFileNm != null and !atchFileNm.equals("")'>
+			AND ATCH_FILE_NM = #{atchFileNm}
+		</if>
+		<if test='atchFileSz != null and !atchFileSz.equals("")'>
+			AND ATCH_FILE_SZ = #{atchFileSz}
+		</if>
+		<if test='atchFileSortSn != null and !atchFileSortSn.equals("")'>
+			AND ATCH_FILE_SORT_SN = #{atchFileSortSn}
+		</if>
+		<if test='atchFilePathNm != null and !atchFilePathNm.equals("")'>
+			AND ATCH_FILE_PATH_NM = #{atchFilePathNm}
+		</if>
+
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>
+					AND ORGNL_ATCH_FILE_NM LIKE '%'||#{searchKeyword}||'%'
+				</when>
+				<when test='"1".equals(searchCondition)'>
+					AND ORGNL_ATCH_FILE_NM LIKE '%'||#{searchKeyword}||'%'
+				</when>
+				<when test='"2".equals(searchCondition)'>
+					
+				</when>
+			</choose>
+		</if>
+		-->
+	</sql>
+	<sql id="ComAtchFileColumn">
+		ATCH_FILE_SN		atchFileSn		,
+		ORGNL_ATCH_FILE_NM	orgnlAtchFileNm	,
+		ATCH_FILE_NM		atchFileNm		,
+		ATCH_FILE_SZ		atchFileSz		,
+		ATCH_FILE_EXTN_NM	atchFileExtnNm	,
+		ATCH_FILE_PATH_NM	atchFilePathNm  ,
+		RGTR_ID             rgtrId          ,
+		MDFR_ID             mdfrId          ,
+		REG_DT              regDt           ,
+		MDFCN_DT            mdfcnDt         ,
+		DEL_YN              delYn
+	</sql>
+	<sql id="ComAtchFileTable">
+	    TB_ATCH_FILE
+	</sql>
+	<select id="selectList" parameterType="exts.com.vo.ComAtchFileVO" resultType="exts.com.vo.ComAtchFileVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="ComAtchFileColumn"/>
+				FROM
+					<include refid="ComAtchFileTable"/>
+				<include refid="ComAtchFileWhere"/>
+				ORDER BY
+					ATCH_FILE_SN ASC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.com.vo.ComAtchFileVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="ComAtchFileTable"/>
+		<include refid="ComAtchFileWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.com.vo.ComAtchFileVO" resultType="exts.com.vo.ComAtchFileVO">
+		SELECT
+			<include refid="ComAtchFileColumn"/>
+		FROM
+			<include refid="ComAtchFileTable"/>
+		WHERE
+			DEL_YN = 'N'
+			AND ATCH_FILE_SN = #{atchFileSn}
+			<if test='rgtrId != null and !rgtrId.equals("")'>
+				AND RGTR_ID = #{rgtrId}
+			</if>
+	</select>
+	
+	<select id="selectSpr" parameterType="exts.koreahana.spr.vo.KoreahanaSprVO" resultType="exts.com.vo.ComAtchFileVO">
+		SELECT
+			af.ATCH_FILE_SN			atchFileSn		,
+			af.ORGNL_ATCH_FILE_NM	orgnlAtchFileNm	,
+			af.ATCH_FILE_NM			atchFileNm		,
+			af.ATCH_FILE_SZ			atchFileSz		,
+			af.ATCH_FILE_EXTN_NM	atchFileExtnNm	,
+			af.ATCH_FILE_PATH_NM	atchFilePathNm  ,
+			
+			s.RGTR_ID             	rgtrId          ,
+			s.MDFR_ID             	mdfrId          ,
+			s.REG_DT              	regDt           ,
+			s.MDFCN_DT            	mdfcnDt         ,
+			s.DEL_YN              	delYn
+		FROM
+			TB_SPRT s
+			LEFT JOIN TB_SPRT_SMB_DOC_MPNG ssdm ON (s.SPRT_SN = ssdm.SPRT_SN)
+			LEFT JOIN TB_ATCH_FILE af ON (ssdm.ATCH_FILE_SN = af.ATCH_FILE_SN AND af.DEL_YN = 'N')
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_SN = #{sprtSn}
+			AND af.ATCH_FILE_SN = #{atchFileSn}
+			AND ROWNUM = 1		<!-- 동일한 지원에 동일한 문서함의 파일이 들어갔을때 오류를 막기 위함 -->
+	</select>
+	
+	<insert id="insert" parameterType="exts.com.vo.ComAtchFileVO">
+		<selectKey resultType="string" keyProperty="atchFileSn" order="BEFORE">
+			SELECT SEQ_TB_ATCH_FILE.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_ATCH_FILE (
+			ATCH_FILE_SN		,
+			ORGNL_ATCH_FILE_NM	,
+			ATCH_FILE_NM		,
+			ATCH_FILE_SZ		,
+			ATCH_FILE_EXTN_NM	,
+			ATCH_FILE_PATH_NM   ,
+			RGTR_ID             ,
+			MDFR_ID             ,
+			REG_DT              ,
+			MDFCN_DT            ,
+			DEL_YN              
+		) VALUES (
+			#{atchFileSn}		,
+			#{orgnlAtchFileNm}	,
+			#{atchFileNm}		,
+			#{atchFileSz}		,
+			#{atchFileExtnNm}	,
+			#{atchFilePathNm}   ,
+			#{rgtrId}           ,
+			#{mdfrId}           ,
+			SYSDATE             ,
+			SYSDATE             ,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.com.vo.ComAtchFileVO">
+		UPDATE 
+			TB_ATCH_FILE
+		SET
+			ORGNL_ATCH_FILE_NM	=	#{orgnlAtchFileNm}	,
+			ATCH_FILE_NM		=	#{atchFileNm}		,
+			ATCH_FILE_SZ		=	#{atchFileSz}		,
+			ATCH_FILE_EXTN_NM	=	#{atchFileExtnNm}	,
+			ATCH_FILE_PATH_NM	=	#{atchFilePathNm}	,
+			MDFR_ID		        =   #{mdfrId}           ,
+			MDFCN_DT		    =   SYSDATE
+		WHERE
+			ATCH_FILE_SN = #{atchFileSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.com.vo.ComAtchFileVO">
+		UPDATE
+			TB_ATCH_FILE
+		SET
+			DEL_YN             = 'Y'         ,
+			MDFR_ID		       = #{mdfrId}   ,
+			MDFCN_DT		   = SYSDATE
+		WHERE
+			ATCH_FILE_SN = #{atchFileSn}
+	</update>
+	
+	<update id="deleteList" parameterType="exts.com.vo.ComAtchFileVO">
+		UPDATE
+			TB_ATCH_FILE
+		SET
+			DEL_YN             = 'Y'         ,
+			MDFR_ID		       = #{mdfrId}   ,
+			MDFCN_DT		   = SYSDATE
+		WHERE
+			1 = 1
+			<foreach open="AND ATCH_FILE_SN IN (" close=")" item="item" index="index" collection="atchFileSnList" separator=",">
+				#{item}
+			</foreach>
+	</update>
+</mapper>

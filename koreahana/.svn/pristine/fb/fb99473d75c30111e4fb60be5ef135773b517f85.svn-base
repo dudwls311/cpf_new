@@ -1,0 +1,115 @@
+<% response.setHeader("Cache-Control","no-store"); response.setHeader("Pragma","no-cache"); response.setDateHeader("Expires",0); if (request.getProtocol().equals("HTTP/1.1")) { response.setHeader("Cache-Control", "no-cache"); } %><%@ page contentType="text/html; charset=utf-8" %><%@ include file='/_common/header.jsp' %><c:set var="Jnit_sitePath" value="support" /><%@ page import="jnit.cms.mbr.MbrUtil" %><%@ page import='jnit.cms.config.ConfigUtil' %><% String message = ""; if(request.getParameter("message") != null){ String error =	request.getParameter("message"); message = error; } %><% Boolean siauth = MbrUtil.siauth(); Boolean gpinauth = MbrUtil.gpinauth(); Boolean pkiauth = MbrUtil.pkiauth(); %><c:set var="Jnit_sitePath" value="support" /><c:set var="siteId" value="SITE_00001" /><%@ include file='/support/_tpls/B/TPL_000018_S.jsp' %><% /*<!-- [-CONTENT-] -->*/ %><%@ include file="/WEB-INF/jsp/exts/koreahana/com/user_header_inc.jsp" %>
+		<script type="text/javascript">
+		$(document).ready(function(){
+//	     	$('#mbrId').focus();
+	        
+	    	var ajform = new ComAjaxForm('loginForm','listForm', 
+	    		{
+	    		beforeSerializeFunction : function(){
+	    			$('#loginForm input').removeClass('input_rere');
+	    			$('#msgDiv').hide();
+	    			$('#mbrLoginMsg').hide();
+	    			$('#passwdMsg').hide();
+	    		},
+	    		successFunction : function(resultData, statusText, xhr, $form){
+	    			if(resultData.isSuccess == true){
+	    				location.href = resultData.msg;	    				
+	    			}else{
+	    				ComFns.hideLoading();
+	    				if(resultData.msg){
+	    					if(resultData.msg.indexOf('로그인이 차단되었습니다') >= 0){
+
+	    						ComFns.popup.init({
+	    							title:'로그인 차단',
+	    							confirmBtn:true,
+	    							confirmBtnClickMethod:function(){
+	    								ComFns.openRealAuth();
+	    							}
+	    						});
+	    						ComFns.popup.changeContentHtml($('#divBlock').html());
+	    						ComFns.popup.show();
+	    						$('#modalDiv_confirmBtn').text('로그인 차단 해제 (본인인증)');
+	    					}else{
+		    					//alert(resultData.msg);
+		    					$('#msgDiv > p').text(resultData.msg);
+		    					$('#msgDiv').show();	    						
+	    					}
+	    					
+	    					return;
+	    				}
+	    				if(resultData.errorList){
+	    					for(var i = 0; i < resultData.errorList.length; i++){
+	    						var e = resultData.errorList[i];
+	    						//alert(e.errorMessage);
+								$('#'+e.errorField).addClass('input_rere');
+								$('#'+e.errorField + 'Msg').text(e.errorMessage);
+	    						$('#'+e.errorField + 'Msg').show();
+	    						return;
+	    					}	
+	    				}
+	    			}
+	    		}
+	    	});
+	    	ajform.init();
+
+	    });
+		
+		function fnAuthCallback(){
+			$.ajax({
+				url:'/user/exts/koreahana/mbr/blockRemoveActionJson.do',
+				data:{mbrLogin:$('#mbrLogin').val()},
+				success:function(data){
+					if(data.isSuccess){
+						alert('로그인 차단이 해제되었습니다.');
+						location.reload();
+					}else{
+						alert(data.msg);
+					}
+				}
+			});
+		}
+		</script>
+
+  <form name="loginForm" id="loginForm" class="form-vertical" action ="<c:url value='/user/exts/koreahana/mbr/loginAction.do'/>" method="post">
+
+    <div class="login_box logbox_nofloat">
+      <div class="login_box_02">
+        <h3>로그인</h3>
+        <label for="mbrLogin">아이디</label>
+        <input type="text" name="mbrLogin" id="mbrLogin" placeholder="아이디" />
+        <p id="mbrLoginMsg" class="txt_c_re" style="display: none;">아이디를 입력해 주세요.</p>
+
+        <label for="passwd">비밀번호</label>
+        <input type="password" name="passwd" id="passwd" placeholder="비밀번호" />
+        <p id="passwdMsg" class="txt_c_re" style="display: none;">비밀번호를 입력해 주세요. / 아이디 또는 비밀번호가 일치하지 않습니다.</p>
+
+        <button type="submit" class="login_btn">로그인</button>
+
+        <div class="login_or_d AlignCenter">
+          <p class="or_d_tit MAB10">다양한 정부사이트를 하나의 아이디로 간편하게</p>
+          <a class="btn_st btn_s_dopass ">디지털원패스로 로그인</a>
+        </div>
+        <div class="box_w_wht MAB0" id="msgDiv" style="display:none">
+          <p class="txt_c_or"></p>
+        </div>
+      </div>
+    </div>
+  </form>
+
+<p class="AlignCenter">
+  <a href="mbr/sign.jsp" class="btn_a">회원가입</a>
+  <span class="MAL10 MAR10">|</span>
+  <a href="mbr/noSetpIdFind.jsp" class="btn_a">아이디 찾기</a>
+  <span class="MAL10 MAR10">|</span>
+  <a href="mbr/noSetpPwFind.jsp" class="btn_a">비밀번호 찾기</a>
+</p>
+</div>
+
+
+<div id="divBlock" style="display:none">
+	<div class="box_w_gray AlignCenter">
+      비밀번호를 5회 이상 잘못 입력하여 로그인이 차단되었습니다.<br>
+로그인 차단 해제를 위해 본인인증 후 비빈번호를 변경해주세요.
+      </div>
+</div>
+<%@ include file="/WEB-INF/jsp/exts/koreahana/com/user_footer_inc.jsp" %><% /*<!-- /[-CONTENT-] -->*/ %><%@ include file='/support/_tpls/B/TPL_000018_E.jsp' %>

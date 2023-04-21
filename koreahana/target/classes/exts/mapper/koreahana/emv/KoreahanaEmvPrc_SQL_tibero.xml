@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.emv.KoreahanaEmvPrc">
+		
+	<sql id="KoreahanaEmvPrcWhere">
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_STTS_CD = #{sprtSttsCd}
+		<if test='pbancrcSn != null and !pbancrcSn.equals("")'>		<!-- 모집공고 -->
+			AND p.PBANCRC_SN = #{pbancrcSn}
+		</if>
+		<if test='rgtrId != null and !rgtrId.equals("")'>			<!-- 작성자 -->
+			AND s.RGTR_ID = #{rgtrId}
+		</if>
+		<if test='bizSeCd != null and !bizSeCd.equals("")'>			<!-- 사업구분 -->
+			AND p.BIZ_SE_CD = #{bizSeCd}
+		</if>
+		<if test='regDtYr != null and !regDtYr.equals("")'>			<!-- 신청연도 -->
+			AND TO_CHAR(s.REG_DT, 'YYYY') = #{regDtYr}
+		</if>
+		<if test='hanactCd != null and !hanactCd.equals("")'>			<!-- 하나센터코드 -->
+			AND e.HANACT_CD = #{hanactCd}
+		</if>		
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>			<!-- 지원대상 이름 -->
+					AND s.FLNM = FN_CRYPTO_ENC(#{searchKeyword},'${scrKey}')
+				</when>
+			</choose>
+		</if>
+		<if test='notInsprtSttsCdList != null'>						<!-- 지외할 상태값 -->
+			<foreach open="AND s.SPRT_STTS_CD NOT IN (" close=")" item="item" index="index" collection="notInsprtSttsCdList" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	</sql>
+	<sql id="KoreahanaEmvPrcColumn">
+		s.SPRT_SN	sprtSn		,
+		FN_CRYPTO_DEC(s.FLNM,'${scrKey}')		flnm		,
+		s.GENDER_CD	genderCd	,
+		FN_CRYPTO_DEC(s.BRDT_YMD,'${scrKey}')	brdtYmd		,
+		FN_CRYPTO_DEC(s.MBPHNO,'${scrKey}')		mbphno		,
+		FN_CRYPTO_DEC(s.ZIP,'${scrKey}')		zip		,
+		FN_CRYPTO_DEC(s.ADDR,'${scrKey}')		addr		,
+		FN_CRYPTO_DEC(s.DADDR,'${scrKey}')		daddr		,
+		s.SPRT_STTS_CD		sprtSttsCd		,
+		s.RSN		rsn		,
+		s.RGTR_ID             rgtrId  ,
+		s.MDFR_ID            mdfrId ,
+		s.REG_DT                regDt    ,
+		s.MDFCN_DT               mdfcnDt   ,
+		s.DEL_YN                  delYn   ,
+		
+		p.PBANCRC_SN		pbancrcSn		,
+		p.PBANCRC_CTGRY_FRST_CD		pbancrcCtgryFrstCd		,
+		p.BIZ_SE_CD       bizSeCd    ,
+		p.RLS_YN          rlsYn      ,
+		p.PBANCRC_NM		pbancrcNm		,
+		p.PBANCRC_CN		pbancrcCn		,
+		p.INQ_CNT		inqCnt		,
+		p.PBANCRC_BGNG_DT		pbancrcBgngDt ,
+		p.PBANCRC_END_DT		pbancrcEndDt ,
+		FN_GET_PBANCRC_STTS(p.PBANCRC_BGNG_DT, p.PBANCRC_END_DT) pbancrcSttsCd ,
+		
+		e.HANACT_CD		hanactCd		,
+		e.HNW_TH		hnwTh		,
+		e.HANAWON_FNSH_YR		hanawonFnshYr		,
+		e.DSCSN_YMD		dscsnYmd		,
+		FN_CRYPTO_DEC(e.CNSL_FLNM,'${scrKey}')		cnslFlnm		,
+		FN_CRYPTO_DEC(e.EML,'${scrKey}')				eml ,
+		
+		jco.ORG_NM		hanactNm		,
+		
+		espm.EMVUCD_SPRT_PRCN_MNG_SN		emvucdSprtPrcnMngSn		,
+		espm.SPRT_SN		sprtSn		,
+		espm.SCHL_NM		schlNm		,
+		espm.MJR_NM		mjrNm		,
+		espm.SCHLYR		schlyr		,
+		espm.OGDP		ogdp		,
+		espm.APLCNT_QLFC_CD		aplcntQlfcCd		,
+		espm.EXIST_CD_USE_YN		existCdUseYn		,
+		FN_CRYPTO_DEC(espm.FRST_CARD_NO,'${scrKey}')		frstCardNo		,
+		FN_CRYPTO_DEC(espm.SCNDRY_CARD_NO,'${scrKey}')		scndryCardNo		,
+		FN_CRYPTO_DEC(espm.THIRD_CARD_NO,'${scrKey}')		thirdCardNo		,
+		espm.BFRHD_APRV_YMD		bfrhdAprvYmd		,
+		espm.APLY_AMT		aplyAmt		,
+		espm.PNTY_YN		pntyYn		,
+		espm.RMRK		rmrk		,
+		espm.HANACT_MEMO		hanactMemo	,
+		CASE 
+			WHEN espm.FRST_CARD_NO IS NOT NULL OR espm.SCNDRY_CARD_NO IS NOT NULL OR espm.THIRD_CARD_NO IS NOT NULL THEN
+				(SELECT SUM(APRV_AMT) FROM TB_EMVUCD_USE_INFO WHERE CARD_NO IN (espm.FRST_CARD_NO, espm.SCNDRY_CARD_NO, espm.THIRD_CARD_NO))
+			ELSE
+				0
+		END  useAmt
+	</sql>
+	<sql id="KoreahanaEmvPrcTable">
+	    TB_SPRT s 
+	    LEFT JOIN TB_EMVUCD e ON (s.SPRT_SN = e.SPRT_SN)
+	    INNER JOIN TB_PBANCRC p ON (p.PBANCRC_SN = s.PBANCRC_SN AND p.DEL_YN = 'N')
+	    LEFT JOIN JNITCMSORG jco ON (e.HANACT_CD = jco.ORG_ID AND jco.ISDEL = 0)
+	    LEFT JOIN TB_EMVUCD_SPRT_PRCN_MNG espm ON (s.SPRT_SN = espm.SPRT_SN)
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.emv.vo.KoreahanaEmvPrcVO" resultType="exts.koreahana.emv.vo.KoreahanaEmvPrcVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaEmvPrcColumn"/>
+				FROM
+					<include refid="KoreahanaEmvPrcTable"/>
+				<include refid="KoreahanaEmvPrcWhere"/>
+				ORDER BY
+					s.SPRT_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.emv.vo.KoreahanaEmvPrcVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaEmvPrcTable"/>
+		<include refid="KoreahanaEmvPrcWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.emv.vo.KoreahanaEmvPrcVO" resultType="exts.koreahana.emv.vo.KoreahanaEmvPrcVO">
+		SELECT
+			<include refid="KoreahanaEmvPrcColumn"/>
+		FROM
+			<include refid="KoreahanaEmvPrcTable"/>
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_STTS_CD = #{sprtSttsCd}
+			AND s.SPRT_SN = #{sprtSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.emv.vo.KoreahanaEmvPrcVO">
+		<selectKey resultType="string" keyProperty="emvucdSprtPrcnMngSn" order="BEFORE">
+			SELECT SEQ_TB_EMVUCD_SPRT_PRCN_MNG.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_EMVUCD_SPRT_PRCN_MNG (
+			EMVUCD_SPRT_PRCN_MNG_SN		,
+			SPRT_SN		,
+			SCHL_NM		,
+			MJR_NM		,
+			SCHLYR		,
+			OGDP		,
+			APLCNT_QLFC_CD		,
+			EXIST_CD_USE_YN		,
+			FRST_CARD_NO		,
+			SCNDRY_CARD_NO		,
+			THIRD_CARD_NO		,
+			BFRHD_APRV_YMD		,
+			APLY_AMT		,
+			PNTY_YN		,
+			RMRK		,
+			HANACT_MEMO		,
+
+			RGTR_ID     ,
+			MDFR_ID       ,
+			REG_DT        ,
+			MDFCN_DT        ,
+			DEL_YN
+		) VALUES (
+			#{emvucdSprtPrcnMngSn}		,
+			#{sprtSn}		,
+			#{schlNm}		,
+			#{mjrNm}		,
+			#{schlyr}		,
+			#{ogdp}		,
+			#{aplcntQlfcCd}		,
+			#{existCdUseYn}		,
+			FN_CRYPTO_ENC(#{frstCardNo},'${scrKey}')		,
+			FN_CRYPTO_ENC(#{scndryCardNo},'${scrKey}')		,
+			FN_CRYPTO_ENC(#{thirdCardNo},'${scrKey}')		,
+			REPLACE(REPLACE(#{bfrhdAprvYmd},'-',''),'.','')		,
+			#{aplyAmt}		,
+			#{pntyYn}		,
+			#{rmrk}		,
+			#{hanactMemo}		,
+
+			#{rgtrId}   ,
+			#{mdfrId}     ,
+			SYSDATE     ,
+			SYSDATE     ,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.emv.vo.KoreahanaEmvPrcVO">
+		UPDATE 
+			TB_EMVUCD_SPRT_PRCN_MNG
+		SET
+			SPRT_SN	=	#{sprtSn}		,
+			SCHL_NM	=	#{schlNm}		,
+			MJR_NM	=	#{mjrNm}		,
+			SCHLYR	=	#{schlyr}		,
+			OGDP	=	#{ogdp}		,
+			APLCNT_QLFC_CD	=	#{aplcntQlfcCd}		,
+			EXIST_CD_USE_YN	=	#{existCdUseYn}		,
+			FRST_CARD_NO	=	FN_CRYPTO_ENC(#{frstCardNo},'${scrKey}')		,
+			SCNDRY_CARD_NO	=	FN_CRYPTO_ENC(#{scndryCardNo},'${scrKey}')		,
+			THIRD_CARD_NO	=	FN_CRYPTO_ENC(#{thirdCardNo},'${scrKey}')		,
+			BFRHD_APRV_YMD	=	REPLACE(REPLACE(#{bfrhdAprvYmd},'-',''),'.','')		,
+			APLY_AMT	=	#{aplyAmt}		,
+			PNTY_YN	=	#{pntyYn}		,
+			RMRK	=	#{rmrk}		,
+			HANACT_MEMO	=	#{hanactMemo}		,
+
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND SPRT_SN	=	#{sprtSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.emv.vo.KoreahanaEmvPrcVO">
+		UPDATE
+			TB_EMVUCD_SPRT_PRCN_MNG
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND EMVUCD_SPRT_PRCN_MNG_SN = #{emvucdSprtPrcnMngSn}
+	</update>
+	
+	<select id="selectListExcel" parameterType="exts.koreahana.emv.vo.KoreahanaEmvPrcVO" resultType="exts.koreahana.emv.vo.KoreahanaEmvPrcVO">
+	
+		SELECT
+			<include refid="KoreahanaEmvPrcColumn"/> ,
+			<include refid="exts.mapper.com.ComMbr.mbrAdtColumn"/>
+			
+			, (SELECT AGGR_CONCAT(a.SBJCT_CD||'^'||a.SBJCT_NM||'^'||a.EDNST_CD||'^'||a.EDNST_NM||'^'||a.TKCLS_PERIOD,',') FROM TB_EMVUCD_SPRT_PRCN_MNG_TKCLS a WHERE a.SPRT_SN = s.SPRT_SN)		sbjctConcat
+		FROM
+			<include refid="KoreahanaEmvPrcTable"/>
+			<include refid="exts.mapper.com.ComMbr.mbrAdtTable"/>
+		<include refid="KoreahanaEmvPrcWhere"/>
+		ORDER BY
+			s.SPRT_SN DESC
+	</select>
+</mapper>

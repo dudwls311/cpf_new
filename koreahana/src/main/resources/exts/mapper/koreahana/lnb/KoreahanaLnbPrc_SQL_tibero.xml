@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.lnb.KoreahanaLnbPrc">
+		
+	<sql id="KoreahanaLnbPrcWhere">
+		WHERE
+			lsbi.DEL_YN = 'N'
+		<if test='sprtSn != null and !sprtSn.equals("")'>
+			AND s.SPRT_SN = #{sprtSn}
+		</if>
+		<if test='pbancrcSn != null and !pbancrcSn.equals("")'>
+			AND s.PBANCRC_SN = #{pbancrcSn}
+		</if>
+		<if test='sprtSttsCd != null and !sprtSttsCd.equals("")'>	<!-- 지원상태 -->
+			AND s.SPRT_STTS_CD = #{sprtSttsCd}
+		</if>
+		<if test='regDtYr != null and !regDtYr.equals("")'>			<!-- 신청연도 -->
+			AND TO_CHAR(s.REG_DT, 'YYYY') = #{regDtYr}
+		</if>
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>			<!-- 지원대상 이름 -->
+					AND FN_CRYPTO_DEC(s.FLNM,'${scrKey}') = #{searchKeyword}
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaLnbPrcColumn">
+		lsbi.LNBK_SPRT_BSC_INFO_SN		lnbkSprtBscInfoSn		,
+		lsbi.SPRT_SN		sprtSn		,
+		lsbi.RNKG		rnkg		,
+		FN_CRYPTO_DEC(lsbi.FLNM,'${scrKey}')		flnm		,
+		FN_CRYPTO_DEC(lsbi.BRDT_YMD,'${scrKey}')		brdtYmd		,
+		lsbi.BRPLC_CD		brplcCd		,
+		lsbi.HANAWON_TH		hanawonTh		,
+		lsbi.ENTCNY_YR		entcnyYr		,
+		lsbi.NTKRDF_OPRT_SE		ntkrdfOprtSe		,
+		FN_CRYPTO_DEC(lsbi.NTKRDF_OPRT_FLNM,'${scrKey}')		ntkrdfOprtFlnm		,
+		lsbi.NTKRDF_OPRT_HANAWON_TH		ntkrdfOprtHanawonTh		,
+		lsbi.NTKRDF_OPRT_ENCTNY_YR		ntkrdfOprtEnctnyYr		,
+		lsbi.NTKRDF_ACRTFCT_FILE_SN		ntkrdfAcrtfctFileSn		,
+		lsbi.EXIST_BNF_CD		existBnfCd		,
+		lsbi.SPRT_TRGT_YN		sprtTrgtYn		,
+		lsbi.VDOENG_DPCN_TRGT_YN		vdoengDpcnTrgtYn		,
+		lsbi.MDW_GBKHM_YMD		mdwGbkhmYmd		,
+		lsbi.GBKHM_RSN		gbkhmRsn		,
+		lsbi.RGTR_ID             rgtrId  ,
+		lsbi.MDFR_ID            mdfrId ,
+		lsbi.REG_DT                regDt    ,
+		lsbi.MDFCN_DT               mdfcnDt   ,
+		lsbi.DEL_YN                  delYn
+	</sql>
+	<sql id="KoreahanaLnbPrcTable">
+	    TB_LNBK_SPRT_BSC_INFO lsbi
+	    LEFT JOIN TB_SPRT s ON (s.SPRT_SN = lsbi.SPRT_SN AND s.DEL_YN = 'N')
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.lnb.vo.KoreahanaLnbPrcVO" resultType="exts.koreahana.lnb.vo.KoreahanaLnbPrcVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaLnbPrcColumn"/>
+				FROM
+					<include refid="KoreahanaLnbPrcTable"/>
+				<include refid="KoreahanaLnbPrcWhere"/>
+				ORDER BY
+					lsbi.RNKG ASC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.lnb.vo.KoreahanaLnbPrcVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaLnbPrcTable"/>
+		<include refid="KoreahanaLnbPrcWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.lnb.vo.KoreahanaLnbPrcVO" resultType="exts.koreahana.lnb.vo.KoreahanaLnbPrcVO">
+		SELECT
+			<include refid="KoreahanaLnbPrcColumn"/>
+		FROM
+			<include refid="KoreahanaLnbPrcTable"/>
+		WHERE
+			lsbi.DEL_YN = 'N'
+			AND lsbi.LNBK_SPRT_BSC_INFO_SN = #{lnbkSprtBscInfoSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.lnb.vo.KoreahanaLnbPrcVO">
+		<selectKey resultType="string" keyProperty="lnbkSprtBscInfoSn" order="BEFORE">
+			SELECT SEQ_TB_LNBK_SPRT_BSC_INFO.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_LNBK_SPRT_BSC_INFO (
+			LNBK_SPRT_BSC_INFO_SN		,
+			SPRT_SN		,
+			RNKG		,
+			FLNM		,
+			BRDT_YMD		,
+			BRPLC_CD		,
+			HANAWON_TH		,
+			ENTCNY_YR		,
+			NTKRDF_OPRT_SE		,
+			NTKRDF_OPRT_FLNM		,
+			NTKRDF_OPRT_HANAWON_TH		,
+			NTKRDF_OPRT_ENCTNY_YR		,
+			NTKRDF_ACRTFCT_FILE_SN		,
+			EXIST_BNF_CD		,
+			SPRT_TRGT_YN		,
+			VDOENG_DPCN_TRGT_YN		,
+			MDW_GBKHM_YMD		,
+			GBKHM_RSN		,
+
+			RGTR_ID     ,
+			MDFR_ID       ,
+			REG_DT        ,
+			MDFCN_DT        ,
+			DEL_YN
+		) VALUES (
+			#{lnbkSprtBscInfoSn}		,
+			#{sprtSn}		,
+			#{rnkg}		,
+			FN_CRYPTO_ENC(#{flnm},'${scrKey}')		,
+			FN_CRYPTO_ENC(#{brdtYmd},'${scrKey}')		,
+			#{brplcCd}		,
+			#{hanawonTh}		,
+			#{entcnyYr}		,
+			#{ntkrdfOprtSe}		,
+			FN_CRYPTO_ENC(#{ntkrdfOprtFlnm},'${scrKey}')		,
+			#{ntkrdfOprtHanawonTh}		,
+			#{ntkrdfOprtEnctnyYr}		,
+			#{ntkrdfAcrtfctFileSn}		,
+			#{existBnfCd}		,
+			#{sprtTrgtYn}		,
+			#{vdoengDpcnTrgtYn}		,
+			REPLACE(REPLACE(#{mdwGbkhmYmd},'-',''),'.','')		,
+			#{gbkhmRsn}		,
+
+			#{rgtrId}   ,
+			#{mdfrId}     ,
+			SYSDATE     ,
+			SYSDATE     ,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.lnb.vo.KoreahanaLnbPrcVO">
+		UPDATE 
+			TB_LNBK_SPRT_BSC_INFO
+		SET
+			RNKG	=	#{rnkg}		,
+			FLNM	=	FN_CRYPTO_ENC(#{flnm},'${scrKey}')		,
+			BRDT_YMD	=	FN_CRYPTO_ENC(#{brdtYmd},'${scrKey}')		,
+			BRPLC_CD	=	#{brplcCd}		,
+			HANAWON_TH	=	#{hanawonTh}		,
+			ENTCNY_YR	=	#{entcnyYr}		,
+			NTKRDF_OPRT_SE	=	#{ntkrdfOprtSe}		,
+			NTKRDF_OPRT_FLNM	=	FN_CRYPTO_ENC(#{ntkrdfOprtFlnm},'${scrKey}')		,
+			NTKRDF_OPRT_HANAWON_TH	=	#{ntkrdfOprtHanawonTh}		,
+			NTKRDF_OPRT_ENCTNY_YR	=	#{ntkrdfOprtEnctnyYr}		,
+			NTKRDF_ACRTFCT_FILE_SN	=	#{ntkrdfAcrtfctFileSn}		,
+			EXIST_BNF_CD	=	#{existBnfCd}		,
+			SPRT_TRGT_YN	=	#{sprtTrgtYn}		,
+			VDOENG_DPCN_TRGT_YN	=	#{vdoengDpcnTrgtYn}		,
+			MDW_GBKHM_YMD	=	REPLACE(REPLACE(#{mdwGbkhmYmd},'-',''),'.','')		,
+			GBKHM_RSN	=	#{gbkhmRsn}		,
+
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND LNBK_SPRT_BSC_INFO_SN = #{lnbkSprtBscInfoSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.lnb.vo.KoreahanaLnbPrcVO">
+		UPDATE
+			TB_LNBK_SPRT_BSC_INFO
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND LNBK_SPRT_BSC_INFO_SN = #{lnbkSprtBscInfoSn}
+	</update>
+	
+	<update id="deleteList" parameterType="exts.koreahana.lnb.vo.KoreahanaLnbPrcVO">
+		UPDATE
+			TB_LNBK_SPRT_BSC_INFO
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			<foreach open="AND LNBK_SPRT_BSC_INFO_SN IN (" close=")" item="item" index="index" collection="lnbkSprtBscInfoSnList" separator=",">
+				#{item}
+			</foreach>
+	</update>
+</mapper>

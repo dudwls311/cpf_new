@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.spf.KoreahanaSpfPrc">
+		
+	<sql id="KoreahanaSpfPrcWhere">
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_STTS_CD = #{sprtSttsCd}
+		<if test='pbancrcSn != null and !pbancrcSn.equals("")'>		<!-- 모집공고 -->
+			AND p.PBANCRC_SN = #{pbancrcSn}
+		</if>
+		<if test='rgtrId != null and !rgtrId.equals("")'>			<!-- 작성자 -->
+			AND s.RGTR_ID = #{rgtrId}
+		</if>
+		<if test='bizSeCd != null and !bizSeCd.equals("")'>			<!-- 사업구분 -->
+			AND p.BIZ_SE_CD = #{bizSeCd}
+		</if>
+		<if test='sprtSttsCd != null and !sprtSttsCd.equals("")'>	<!-- 지원상태 -->
+			AND s.SPRT_STTS_CD = #{sprtSttsCd}
+		</if>
+		<if test='regDtYr != null and !regDtYr.equals("")'>			<!-- 신청연도 -->
+			AND TO_CHAR(s.REG_DT, 'YYYY') = #{regDtYr}
+		</if>
+		<if test='rgtrId != null and !testRsltCd.equals("")'>			<!-- 시험결과 -->
+			AND spm.TEST_RSLT_CD = #{testRsltCd}
+		</if>
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>			<!-- 지원대상 이름 -->
+					AND s.FLNM = FN_CRYPTO_ENC(#{searchKeyword},'${scrKey}')
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaSpfPrcColumn">
+	s.SPRT_SN	sprtSn		,
+		FN_CRYPTO_DEC(s.FLNM,'${scrKey}')		flnm		,
+		s.GENDER_CD	genderCd	,
+		FN_CRYPTO_DEC(s.BRDT_YMD,'${scrKey}')	brdtYmd		,
+		FN_CRYPTO_DEC(s.MBPHNO,'${scrKey}')		mbphno		,
+		FN_CRYPTO_DEC(s.ZIP,'${scrKey}')		zip		,
+		FN_CRYPTO_DEC(s.ADDR,'${scrKey}')		addr		,
+		FN_CRYPTO_DEC(s.DADDR,'${scrKey}')		daddr		,
+		s.SPRT_STTS_CD		sprtSttsCd		,
+		s.RSN		rsn		,
+		s.RGTR_ID             rgtrId  ,
+		s.MDFR_ID            mdfrId ,
+		s.REG_DT                regDt    ,
+		s.MDFCN_DT               mdfcnDt   ,
+		s.DEL_YN                  delYn   ,
+		
+        p.PBANCRC_SN		pbancrcSn		,
+		p.PBANCRC_CTGRY_FRST_CD		pbancrcCtgryFrstCd		,
+		p.BIZ_SE_CD       bizSeCd    ,
+		p.RLS_YN          rlsYn      ,
+		p.PBANCRC_NM		pbancrcNm		,
+		p.PBANCRC_CN		pbancrcCn		,
+		p.INQ_CNT		inqCnt		,
+		p.PBANCRC_BGNG_DT		pbancrcBgngDt ,
+		p.PBANCRC_END_DT		pbancrcEndDt ,
+		FN_GET_PBANCRC_STTS(p.PBANCRC_BGNG_DT, p.PBANCRC_END_DT) pbancrcSttsCd	,
+		
+		sp.PHOTO_FILE_SN		photoFileSn		,
+		sp.ORDP_NM		ordpNm		,
+		FN_CRYPTO_DEC(sp.CRTFCT_RCV_ZIP,'${scrKey}')		crtfctRcvZip	 ,
+		FN_CRYPTO_DEC(sp.CRTFCT_RCV_ADDR,'${scrKey}')		crtfctRcvAddr	,
+		FN_CRYPTO_DEC(sp.CRTFCT_RCV_DADDR,'${scrKey}')	crtfctRcvDaddr	,
+		FN_CRYPTO_DEC(sp.EML,'${scrKey}')		eml		,
+		sp.LAST_ACBG_CD		lastAcbgCd		,
+		sp.LAST_ACBG_ETC		lastAcbgEtc		,
+		sp.OCPT_INST_TYPE_CD		ocptInstTypeCd		,
+		sp.OCPT_INST_TYPE_ETC		ocptInstTypeEtc		,
+		sp.PTEXP		ptexp		,
+		sp.APLY_MTV		aplyMtv		,
+		sp.EDU_FNSH_YMD		eduFnshYmd		,
+		sp.SGNT_FILE_SN		sgntFileSn		,
+		FN_CRYPTO_DEC(sp.SGNTR_FLNM,'${scrKey}')		sgntrFlnm ,
+		
+		spm.SPFST_PRCN_MNG_SN		spfstPrcnMngSn		,
+		spm.SPFST_QLFC_TEST_INFO_SN		spfstQlfcTestInfoSn		,
+		spm.EXSLNO		exslno		,
+		spm.TEST_RSLT_CD		testRsltCd		,
+		spm.PASS_YMD		passYmd		
+	</sql>
+	<sql id="KoreahanaSpfPrcTable">
+	    TB_SPRT s 
+	    LEFT JOIN TB_SPFST sp ON (s.SPRT_SN = sp.SPRT_SN)
+	    LEFT JOIN TB_SPFST_PRCN_MNG spm ON (s.SPRT_SN = spm.SPRT_SN)
+	    INNER JOIN TB_PBANCRC p ON (p.PBANCRC_SN = s.PBANCRC_SN AND p.DEL_YN = 'N')
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.spf.vo.KoreahanaSpfPrcVO" resultType="exts.koreahana.spf.vo.KoreahanaSpfPrcVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaSpfPrcColumn"/>
+				FROM
+					<include refid="KoreahanaSpfPrcTable"/>
+				<include refid="KoreahanaSpfPrcWhere"/>
+				ORDER BY
+					s.SPRT_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.spf.vo.KoreahanaSpfPrcVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaSpfPrcTable"/>
+		<include refid="KoreahanaSpfPrcWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.spf.vo.KoreahanaSpfPrcVO" resultType="exts.koreahana.spf.vo.KoreahanaSpfPrcVO">
+		SELECT
+			<include refid="KoreahanaSpfPrcColumn"/>
+		FROM
+			<include refid="KoreahanaSpfPrcTable"/>
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_STTS_CD = #{sprtSttsCd}
+			AND s.SPRT_SN = #{sprtSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.spf.vo.KoreahanaSpfPrcVO">
+		<selectKey resultType="string" keyProperty="spfstPrcnMngSn" order="BEFORE">
+			SELECT SEQ_TB_SPFST_PRCN_MNG.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_SPFST_PRCN_MNG (
+			SPFST_PRCN_MNG_SN		,
+			SPRT_SN		,
+			SPFST_QLFC_TEST_INFO_SN		,
+			EXSLNO		,
+			TEST_RSLT_CD		,
+			PASS_YMD		,
+
+			RGTR_ID     ,
+			MDFR_ID       ,
+			REG_DT        ,
+			MDFCN_DT        ,
+			DEL_YN
+		) VALUES (
+			#{spfstPrcnMngSn}		,
+			#{sprtSn}		,
+			#{spfstQlfcTestInfoSn}		,
+			#{exslno}		,
+			#{testRsltCd}		,
+			REPLACE(REPLACE(#{passYmd},'-',''),'.','')		,
+
+			#{rgtrId}   ,
+			#{mdfrId}     ,
+			SYSDATE     ,
+			SYSDATE     ,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.spf.vo.KoreahanaSpfPrcVO">
+		UPDATE 
+			TB_SPFST_PRCN_MNG
+		SET
+			SPRT_SN	=	#{sprtSn}		,
+			SPFST_QLFC_TEST_INFO_SN	=	#{spfstQlfcTestInfoSn}		,
+			EXSLNO	=	#{exslno}		,
+			TEST_RSLT_CD	=	#{testRsltCd}		,
+			PASS_YMD	=	REPLACE(REPLACE(#{passYmd},'-',''),'.','')		,
+
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND SPRT_SN = #{sprtSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.spf.vo.KoreahanaSpfPrcVO">
+		UPDATE
+			TB_SPFST_PRCN_MNG
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND SPRT_SN = #{sprtSn}
+	</update>	
+	
+	<update id="updateExslno" parameterType="exts.koreahana.spf.vo.KoreahanaSpfExcelVO">
+		MERGE INTO
+			TB_SPFST_PRCN_MNG 
+			USING dual
+				ON (SPRT_SN = #{sprtSn})
+			WHEN MATCHED THEN
+				UPDATE
+				SET 
+					EXSLNO	=	#{exslno}		,
+					MDFR_ID       = #{mdfrId}    ,
+					MDFCN_DT          = SYSDATE
+			WHEN NOT MATCHED THEN
+				INSERT (
+					SPFST_PRCN_MNG_SN		,
+					EXSLNO		,
+					RGTR_ID     ,
+					MDFR_ID       ,
+					REG_DT        ,
+					MDFCN_DT        ,
+					DEL_YN
+				) VALUES (
+					SEQ_TB_SPFST_PRCN_MNG.NEXTVAL,
+					#{exslno}	,
+					#{rgtrId}   ,
+					#{mdfrId}     ,
+					SYSDATE     ,
+					SYSDATE     ,
+					'N'
+				)
+	</update>	
+	
+	
+	<select id="selectListExcel" parameterType="exts.koreahana.spf.vo.KoreahanaSpfPrcVO" resultType="exts.koreahana.spf.vo.KoreahanaSpfPrcExcelVO">
+	
+		SELECT
+			<include refid="KoreahanaSpfPrcColumn"/> ,
+			<include refid="exts.mapper.com.ComMbr.mbrAdtColumn"/> ,
+			sqti.TEST_PLC		testPlc		,
+			sqti.TEST_YMD		testYmd		,
+			sqti.TEST_HR_INFO		testHrInfo		,
+			sqti.SCCD_PRSNTN_YMD		sccdPrsntnYmd
+		FROM
+			<include refid="KoreahanaSpfPrcTable"/>
+			<include refid="exts.mapper.com.ComMbr.mbrAdtTable"/>
+			LEFT JOIN TB_SPFST_QLFC_TEST_INFO sqti ON (p.PBANCRC_SN = sqti.PBANCRC_SN)
+		<include refid="KoreahanaSpfPrcWhere"/>
+	</select>
+</mapper>

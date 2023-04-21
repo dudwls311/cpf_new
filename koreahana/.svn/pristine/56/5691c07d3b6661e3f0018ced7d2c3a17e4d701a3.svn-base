@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.fth.KoreahanaFthMtr">
+		
+	<sql id="KoreahanaFthMtrWhere">
+		WHERE
+			DEL_YN = 'N'
+		<if test='rcptYear != null and !rcptYear.equals("")'>
+			AND SUBSTR(RCPT_YMD,1,4) = #{rcptYear}
+		</if>
+		<!--
+		<if test='flnm != null and !flnm.equals("")'>
+			AND FLNM = #{flnm}
+		</if>
+		<if test='rrno != null and !rrno.equals("")'>
+			AND RRNO = #{rrno}
+		</if>
+		<if test='mbphno != null and !mbphno.equals("")'>
+			AND MBPHNO = #{mbphno}
+		</if>
+		<if test='ctpvCd != null and !ctpvCd.equals("")'>
+			AND CTPV_CD = #{ctpvCd}
+		</if>
+		<if test='sggCd != null and !sggCd.equals("")'>
+			AND SGG_CD = #{sggCd}
+		</if>
+		<if test='rcptYmd != null and !rcptYmd.equals("")'>
+			AND RCPT_YMD = #{rcptYmd}
+		</if>
+		<if test='cncltnYmd != null and !cncltnYmd.equals("")'>
+			AND CNCLTN_YMD = #{cncltnYmd}
+		</if>
+		<if test='jrdcHanactNm != null and !jrdcHanactNm.equals("")'>
+			AND JRDC_HANACT_NM = #{jrdcHanactNm}
+		</if>
+		<if test='bbJoinYmd != null and !bbJoinYmd.equals("")'>
+			AND BB_JOIN_YMD = #{bbJoinYmd}
+		</if>
+		<if test='usdusgCd != null and !usdusgCd.equals("")'>
+			AND USDUSG_CD = #{usdusgCd}
+		</if>
+		<if test='idtprsSavingAmt != null and !idtprsSavingAmt.equals("")'>
+			AND IDTPRS_SAVING_AMT = #{idtprsSavingAmt}
+		</if>
+		<if test='fndtSavingAmt != null and !fndtSavingAmt.equals("")'>
+			AND FNDT_SAVING_AMT = #{fndtSavingAmt}
+		</if>
+		<if test='mtryMmCnt != null and !mtryMmCnt.equals("")'>
+			AND MTRY_MM_CNT = #{mtryMmCnt}
+		</if>
+		<if test='fncEduTkclsYmd != null and !fncEduTkclsYmd.equals("")'>
+			AND FNC_EDU_TKCLS_YMD = #{fncEduTkclsYmd}
+		</if>
+		<if test='idtprsSavingAmtActno != null and !idtprsSavingAmtActno.equals("")'>
+			AND IDTPRS_SAVING_AMT_ACTNO = #{idtprsSavingAmtActno}
+		</if>
+		<if test='stmchkActno != null and !stmchkActno.equals("")'>
+			AND STMCHK_ACTNO = #{stmchkActno}
+		</if>
+		<if test='rmrk != null and !rmrk.equals("")'>
+			AND RMRK = #{rmrk}
+		</if>
+		<if test='sprtSttsCd != null and !sprtSttsCd.equals("")'>
+			AND SPRT_STTS_CD = #{sprtSttsCd}
+		</if>
+		<if test='rsn != null and !rsn.equals("")'>
+			AND RSN = #{rsn}
+		</if>
+
+		-->
+		
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>	<!-- 전체 -->
+					AND FLNM = FN_CRYPTO_ENC(#{searchKeyword},'${scrKey}')
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaFthMtrColumn">
+		FTHPBB_MTRY_CNCLTN_SN		fthpbbMtryCncltnSn		,
+		FN_CRYPTO_DEC(FLNM,'${scrKey}')		flnm		,
+		FN_CRYPTO_DEC(RRNO,'${scrKey}')		rrno		,
+		FN_CRYPTO_DEC(MBPHNO,'${scrKey}')		mbphno		,
+		CTPV_CD		ctpvCd		,
+		SGG_CD		sggCd		,
+		RCPT_YMD		rcptYmd		,
+		CNCLTN_YMD		cncltnYmd		,
+		JRDC_HANACT_NM		jrdcHanactNm		,
+		BB_JOIN_YMD		bbJoinYmd		,
+		USDUSG_CD		usdusgCd		,
+		IDTPRS_SAVING_AMT		idtprsSavingAmt		,
+		FNDT_SAVING_AMT		fndtSavingAmt		,
+		MTRY_MM_CNT		mtryMmCnt		,
+		FNC_EDU_TKCLS_YMD		fncEduTkclsYmd		,
+		IDTPRS_SAVING_AMT_ACTNO		idtprsSavingAmtActno		,
+		STMCHK_ACTNO		stmchkActno		,
+		RMRK		rmrk		,
+		SPRT_STTS_CD		sprtSttsCd		,
+		RSN		rsn		,
+
+		RGTR_ID             rgtrId  ,
+		MDFR_ID            mdfrId ,
+		REG_DT                regDt    ,
+		MDFCN_DT               mdfcnDt   ,
+		DEL_YN                  delYn 
+	</sql>
+	<sql id="KoreahanaFthMtrTable">
+	    TB_FTHPBB_MTRY_CNCLTN
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.fth.vo.KoreahanaFthMtrVO" resultType="exts.koreahana.fth.vo.KoreahanaFthMtrVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaFthMtrColumn"/>
+				FROM
+					<include refid="KoreahanaFthMtrTable"/>
+				<include refid="KoreahanaFthMtrWhere"/>
+				ORDER BY
+					FTHPBB_MTRY_CNCLTN_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.fth.vo.KoreahanaFthMtrVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaFthMtrTable"/>
+		<include refid="KoreahanaFthMtrWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.fth.vo.KoreahanaFthMtrVO" resultType="exts.koreahana.fth.vo.KoreahanaFthMtrVO">
+		SELECT
+			<include refid="KoreahanaFthMtrColumn"/>
+		FROM
+			<include refid="KoreahanaFthMtrTable"/>
+		WHERE
+			DEL_YN = 'N'
+			AND FTHPBB_MTRY_CNCLTN_SN = #{fthpbbMtryCncltnSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.fth.vo.KoreahanaFthMtrVO">
+		<selectKey resultType="string" keyProperty="fthpbbMtryCncltnSn" order="BEFORE">
+			SELECT SEQ_TB_FTHPBB_MTRY_CNCLTN.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_FTHPBB_MTRY_CNCLTN (
+			FTHPBB_MTRY_CNCLTN_SN		,
+			FLNM		,
+			RRNO		,
+			MBPHNO		,
+			CTPV_CD		,
+			SGG_CD		,
+			RCPT_YMD		,
+			CNCLTN_YMD		,
+			JRDC_HANACT_NM		,
+			BB_JOIN_YMD		,
+			USDUSG_CD		,
+			IDTPRS_SAVING_AMT		,
+			FNDT_SAVING_AMT		,
+			MTRY_MM_CNT		,
+			FNC_EDU_TKCLS_YMD		,
+			IDTPRS_SAVING_AMT_ACTNO		,
+			STMCHK_ACTNO		,
+			RMRK		,
+			SPRT_STTS_CD		,
+			RSN		,
+
+			RGTR_ID     ,
+			MDFR_ID       ,
+			REG_DT        ,
+			MDFCN_DT        ,
+			DEL_YN
+		) VALUES (
+			#{fthpbbMtryCncltnSn}		,
+			FN_CRYPTO_ENC(#{flnm},'${scrKey}')		,
+			FN_CRYPTO_ENC(REPLACE(#{rrno},'-',''),'${scrKey}')		,
+			FN_CRYPTO_ENC(#{mbphno},'${scrKey}')		,
+			#{ctpvCd}		,
+			#{sggCd}		,
+			REPLACE(REPLACE(#{rcptYmd},'-',''),'.','')		,
+			REPLACE(REPLACE(#{cncltnYmd},'-',''),'.','')		,
+			#{jrdcHanactNm}		,
+			REPLACE(REPLACE(#{bbJoinYmd},'-',''),'.','')		,
+			#{usdusgCd}		,
+			#{idtprsSavingAmt}		,
+			#{fndtSavingAmt}		,
+			#{mtryMmCnt}		,
+			REPLACE(REPLACE(#{fncEduTkclsYmd},'-',''),'.','')		,
+			#{idtprsSavingAmtActno}		,
+			#{stmchkActno}		,
+			#{rmrk}		,
+			#{sprtSttsCd}		,
+			#{rsn}		,
+
+			#{rgtrId}   ,
+			#{mdfrId}     ,
+			SYSDATE     ,
+			SYSDATE     ,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.fth.vo.KoreahanaFthMtrVO">
+		UPDATE 
+			TB_FTHPBB_MTRY_CNCLTN
+		SET
+			FLNM	=	FN_CRYPTO_ENC(#{flnm},'${scrKey}')		,
+			RRNO	=	FN_CRYPTO_ENC(REPLACE(#{rrno},'-',''),'${scrKey}')		,
+			MBPHNO	=	FN_CRYPTO_ENC(#{mbphno},'${scrKey}')		,
+			CTPV_CD	=	#{ctpvCd}		,
+			SGG_CD	=	#{sggCd}		,
+			RCPT_YMD	=	REPLACE(REPLACE(#{rcptYmd},'-',''),'.','')		,
+			CNCLTN_YMD	=	REPLACE(REPLACE(#{cncltnYmd},'-',''),'.','')		,
+			JRDC_HANACT_NM	=	#{jrdcHanactNm}		,
+			BB_JOIN_YMD	=	REPLACE(REPLACE(#{bbJoinYmd},'-',''),'.','')		,
+			USDUSG_CD	=	#{usdusgCd}		,
+			IDTPRS_SAVING_AMT	=	#{idtprsSavingAmt}		,
+			FNDT_SAVING_AMT	=	#{fndtSavingAmt}		,
+			MTRY_MM_CNT	=	#{mtryMmCnt}		,
+			FNC_EDU_TKCLS_YMD	=	REPLACE(REPLACE(#{fncEduTkclsYmd},'-',''),'.','')		,
+			IDTPRS_SAVING_AMT_ACTNO	=	#{idtprsSavingAmtActno}		,
+			STMCHK_ACTNO	=	#{stmchkActno}		,
+			RMRK	=	#{rmrk}		,
+			SPRT_STTS_CD	=	#{sprtSttsCd}		,
+			RSN	=	#{rsn}		,
+
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND FTHPBB_MTRY_CNCLTN_SN = #{fthpbbMtryCncltnSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.fth.vo.KoreahanaFthMtrVO">
+		UPDATE
+			TB_FTHPBB_MTRY_CNCLTN
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND FTHPBB_MTRY_CNCLTN_SN = #{fthpbbMtryCncltnSn}
+	</update>
+	
+	<select id="selectStatisticJoinYm" parameterType="exts.koreahana.fth.vo.KoreahanaFthMtrVO" resultType="egovMap">
+		SELECT
+			COUNT(*) CNT,
+			SUBSTR(BB_JOIN_YMD,1,4) BB_JOIN_YEAR,
+			SUBSTR(BB_JOIN_YMD,5,2) BB_JOIN_MONTH
+		FROM
+			TB_FTHPBB_MTRY_CNCLTN
+		WHERE
+			DEL_YN = 'N'
+		GROUP BY
+			ROLLUP(SUBSTR(BB_JOIN_YMD,1,4),SUBSTR(BB_JOIN_YMD,5,2))
+		ORDER BY
+			SUBSTR(BB_JOIN_YMD,1,4),
+			SUBSTR(BB_JOIN_YMD,5,2)
+	</select>	
+	<select id="selectStatisticUsdusgCd" parameterType="exts.koreahana.fth.vo.KoreahanaFthNewVO" resultType="egovMap">
+		SELECT
+			COUNT(*) CNT,
+			USDUSG_CD
+		FROM
+			TB_FTHPBB_MTRY_CNCLTN
+		WHERE
+			DEL_YN = 'N'
+		GROUP BY
+			ROLLUP(USDUSG_CD)	
+	</select>	
+</mapper>

@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.smb.KoreahanaSmb">
+		
+	<sql id="KoreahanaSmbWhere">
+		WHERE
+			sd.DEL_YN = 'N'
+		<!--
+		<if test='smbsnDocNm != null and !smbsnDocNm.equals("")'>
+			AND SMBSN_DOC_NM = #{smbsnDocNm}
+		</if>
+		<if test='smbsnDocMtlYn != null and !smbsnDocMtlYn.equals("")'>
+			AND SMBSN_DOC_MTL_YN = #{smbsnDocMtlYn}
+		</if>
+		<if test='smbsnDocFormSn != null and !smbsnDocFormSn.equals("")'>
+			AND SMBSN_DOC_FORM_SN = #{smbsnDocFormSn}
+		</if>
+		<if test='smbsnDocRqrYn != null and !smbsnDocRqrYn.equals("")'>
+			AND SMBSN_DOC_RQR_YN = #{smbsnDocRqrYn}
+		</if>
+		<if test='docBoxYn != null and !docBoxYn.equals("")'>
+			AND DOC_BOX_YN = #{docBoxYn}
+		</if>
+		-->
+		<if test='smbsnDocList != null'>
+			<foreach open="AND sd.SMBSN_DOC_SN NOT IN (" close=")" item="item" index="index" collection="smbsnDocList" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test='smbsnDocTypeSnList != null'>
+			<foreach open="AND sd.SMBSN_DOC_TYPE_SN IN (" close=")" item="item" index="index" collection="smbsnDocTypeSnList" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	</sql>
+	<sql id="KoreahanaSmbColumn">
+		sd.SMBSN_DOC_SN		smbsnDocSn		,
+		sd.SMBSN_SORT_SN       smbsnSortSn     ,
+		sd.SMBSN_DOC_TYPE_SN   smbsnDocTypeSn  ,
+		sd.SMBSN_DOC_NM		smbsnDocNm		,
+		sd.SMBSN_RSN		    smbsnRsn		,
+		sd.SMBSN_DOC_MTL_YN		smbsnDocMtlYn		,
+		sd.SMBSN_DOC_FORM_SN		smbsnDocFormSn		,
+		sd.SMBSN_DOC_RQR_YN		smbsnDocRqrYn		,
+		sd.DOC_BOX_YN		docBoxYn		,
+		sd.RGTR_ID             rgtrId  ,
+		sd.MDFR_ID            mdfrId ,
+		sd.REG_DT                regDt    ,
+		sd.MDFCN_DT               mdfcnDt   ,
+		sd.DEL_YN                  delYn   ,
+		
+		sdt.SMBSN_DOC_TYPE_VL		smbsnDocTypeVl
+	</sql>
+	<sql id="KoreahanaSmbTable">
+	    TB_SMBSN_DOC sd
+	    LEFT JOIN TB_SMBSN_DOC_TYPE sdt ON (sd.SMBSN_DOC_TYPE_SN = sdt.SMBSN_DOC_TYPE_SN AND sdt.DEL_YN = 'N')
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.smb.vo.KoreahanaSmbVO" resultType="exts.koreahana.smb.vo.KoreahanaSmbVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaSmbColumn"/>
+				FROM
+					<include refid="KoreahanaSmbTable"/>
+				<include refid="KoreahanaSmbWhere"/>
+				ORDER BY
+					SMBSN_SORT_SN ASC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.smb.vo.KoreahanaSmbVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaSmbTable"/>
+		<include refid="KoreahanaSmbWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.smb.vo.KoreahanaSmbVO" resultType="exts.koreahana.smb.vo.KoreahanaSmbVO">
+		SELECT
+			<include refid="KoreahanaSmbColumn"/>
+		FROM
+			<include refid="KoreahanaSmbTable"/>
+		WHERE
+			sd.DEL_YN = 'N'
+			AND SMBSN_DOC_SN = #{smbsnDocSn}
+			<if test='smbsnDocFormSn != null and !smbsnDocFormSn.equals("")'>
+				AND sd.SMBSN_DOC_FORM_SN = #{smbsnDocFormSn}
+			</if>
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.smb.vo.KoreahanaSmbVO">
+		<selectKey resultType="string" keyProperty="smbsnDocSn" order="BEFORE">
+			SELECT SEQ_TB_SMBSN_DOC.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_SMBSN_DOC (
+			SMBSN_DOC_SN		,
+			SMBSN_SORT_SN       ,     
+			SMBSN_DOC_TYPE_SN   ,
+			SMBSN_DOC_NM		,
+			SMBSN_DOC_MTL_YN		,
+			SMBSN_DOC_FORM_SN		,
+			SMBSN_DOC_RQR_YN		,
+			DOC_BOX_YN		,
+			SMBSN_RSN	,
+
+			RGTR_ID     ,
+			MDFR_ID       ,
+			REG_DT        ,
+			MDFCN_DT        ,
+			DEL_YN
+		) VALUES (
+			#{smbsnDocSn}		,
+			#{smbsnSortSn}		,     
+			#{smbsnDocTypeSn}   ,
+			#{smbsnDocNm}		,
+			#{smbsnDocMtlYn}		,
+			#{smbsnDocFormSn}		,
+			#{smbsnDocRqrYn}		,
+			#{docBoxYn}		,
+			#{smbsnRsn}    ,
+
+			#{rgtrId}   ,
+			#{mdfrId}     ,
+			SYSDATE     ,
+			SYSDATE     ,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.smb.vo.KoreahanaSmbVO">
+		UPDATE 
+			TB_SMBSN_DOC
+		SET
+			SMBSN_SORT_SN	=	#{smbsnSortSn}		,     
+			SMBSN_DOC_NM	=	#{smbsnDocNm}		,
+			SMBSN_RSN	=	#{smbsnRsn}				,
+			SMBSN_DOC_MTL_YN	=	#{smbsnDocMtlYn}		,
+			SMBSN_DOC_RQR_YN	=	#{smbsnDocRqrYn}		,
+			DOC_BOX_YN	=	#{docBoxYn}		,
+			SMBSN_DOC_FORM_SN	=	#{smbsnDocFormSn}		,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND SMBSN_DOC_SN = #{smbsnDocSn}
+	</update>
+	
+	<update id="deleteDocForm" parameterType="exts.koreahana.smb.vo.KoreahanaSmbVO">
+		UPDATE 
+			TB_SMBSN_DOC
+		SET
+			SMBSN_DOC_FORM_SN	=	NULL		,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND SMBSN_DOC_SN = #{smbsnDocSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.smb.vo.KoreahanaSmbVO">
+		UPDATE
+			TB_SMBSN_DOC
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND SMBSN_DOC_SN = #{smbsnDocSn}
+	</update>
+	
+	<update id="deleteList" parameterType="exts.koreahana.smb.vo.KoreahanaSmbVO">
+		UPDATE
+			TB_SMBSN_DOC
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			<foreach open="AND SMBSN_DOC_SN IN (" close=")" item="item" index="index" collection="smbsnDocList" separator=",">
+				#{item}
+			</foreach>
+	</update>
+	
+	<update id="deleteTypList" parameterType="exts.koreahana.smb.vo.KoreahanaSmbVO">
+		UPDATE
+			TB_SMBSN_DOC
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			<foreach open="AND SMBSN_DOC_TYPE_SN IN (" close=")" item="item" index="index" collection="smbsnDocTypeSnList" separator=",">
+				#{item}
+			</foreach>
+	</update>
+</mapper>

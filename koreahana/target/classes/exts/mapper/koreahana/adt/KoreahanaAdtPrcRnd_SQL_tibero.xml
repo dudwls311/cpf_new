@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.adt.KoreahanaAdtPrcRnd">
+		
+	<sql id="KoreahanaAdtPrcRndWhere">
+		WHERE
+			1 = 1
+		<if test='sprtSn != null and !sprtSn.equals("")'>
+			AND SPRT_SN = #{sprtSn}
+		</if>
+		<!--
+		<if test='sprtSn != null and !sprtSn.equals("")'>
+			AND SPRT_SN = #{sprtSn}
+		</if>
+		<if test='giveAmt != null and !giveAmt.equals("")'>
+			AND GIVE_AMT = #{giveAmt}
+		</if>
+		<if test='rnd != null and !rnd.equals("")'>
+			AND RND = #{rnd}
+		</if>
+
+		-->
+		
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>	<!-- 전체 -->
+					AND SPRT_SN LIKE '%'||#{searchKeyword}||'%'
+				</when>
+				<when test='"1".equals(searchCondition)'>	<!-- 제목 -->
+					AND SPRT_SN LIKE '%'||#{searchKeyword}||'%'
+				</when>
+				<when test='"2".equals(searchCondition)'>	<!-- 내용 -->
+					
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaAdtPrcRndColumn">
+		ADTN_AMT_SPRT_PRCN_MNG_RND_SN		adtnAmtSprtPrcnMngRndSn		,
+		SPRT_SN		sprtSn		,
+		GIVE_YM		giveYm		,
+		GIVE_AMT		giveAmt		,
+		RND		rnd		
+	</sql>
+	<sql id="KoreahanaAdtPrcRndTable">
+	    TB_ADTN_AMT_SPRT_PRCN_MNG_RND
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.adt.vo.KoreahanaAdtPrcRndVO" resultType="exts.koreahana.adt.vo.KoreahanaAdtPrcRndVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaAdtPrcRndColumn"/>
+				FROM
+					<include refid="KoreahanaAdtPrcRndTable"/>
+				<include refid="KoreahanaAdtPrcRndWhere"/>
+				ORDER BY
+					ADTN_AMT_SPRT_PRCN_MNG_RND_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.adt.vo.KoreahanaAdtPrcRndVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaAdtPrcRndTable"/>
+		<include refid="KoreahanaAdtPrcRndWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.adt.vo.KoreahanaAdtPrcRndVO" resultType="exts.koreahana.adt.vo.KoreahanaAdtPrcRndVO">
+		SELECT
+			<include refid="KoreahanaAdtPrcRndColumn"/>
+		FROM
+			<include refid="KoreahanaAdtPrcRndTable"/>
+		WHERE
+			ADTN_AMT_SPRT_PRCN_MNG_RND_SN = #{adtnAmtSprtPrcnMngRndSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.adt.vo.KoreahanaAdtPrcRndVO">
+		<selectKey resultType="string" keyProperty="adtnAmtSprtPrcnMngRndSn" order="BEFORE">
+			SELECT SEQ_TB_ADTN_AMT_SPRT_PRCN_MNG_RND.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_ADTN_AMT_SPRT_PRCN_MNG_RND (
+			ADTN_AMT_SPRT_PRCN_MNG_RND_SN		,
+			SPRT_SN		,
+			GIVE_YM		,
+			GIVE_AMT		,
+			RND		
+		) VALUES (
+			#{adtnAmtSprtPrcnMngRndSn}		,
+			#{sprtSn}		,
+			REPLACE(REPLACE(#{giveYm},'-',''),'.','')		,
+			#{giveAmt}		,
+			#{rnd}		
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.adt.vo.KoreahanaAdtPrcRndVO">
+		UPDATE 
+			TB_ADTN_AMT_SPRT_PRCN_MNG_RND
+		SET
+			SPRT_SN	=	#{sprtSn}		,
+			GIVE_YM	=	REPLACE(REPLACE(#{giveYm},'-',''),'.','')		,
+			GIVE_AMT	=	#{giveAmt}		,
+			RND	=	#{rnd}		,
+
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND ADTN_AMT_SPRT_PRCN_MNG_RND_SN = #{adtnAmtSprtPrcnMngRndSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.adt.vo.KoreahanaAdtPrcRndVO">
+		UPDATE
+			TB_ADTN_AMT_SPRT_PRCN_MNG_RND
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND ADTN_AMT_SPRT_PRCN_MNG_RND_SN = #{adtnAmtSprtPrcnMngRndSn}
+	</update>	
+	
+	<delete id="deleteByPrcnSn" parameterType="String">
+		DELETE FROM
+			TB_ADTN_AMT_SPRT_PRCN_MNG_RND
+		WHERE
+			SPRT_SN = #{sn}
+	</delete>	
+</mapper>

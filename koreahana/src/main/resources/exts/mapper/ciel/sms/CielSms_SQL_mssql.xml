@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.ciel.sms.CielSms">
+		
+	<select id="sendSms" parameterType="exts.ciel.sms.vo.CielSmsVO" resultType="exts.ciel.sms.vo.CielSmsVO">
+		declare @return_stat int
+		declare @return_clidx int
+		declare @currentdate date 
+		set @currentdate = FORMAT (getdate(), 'yyyy-MM-dd HH:mm:ss')
+		exec sp_syncSend #{userId} , #{subCode} , #{sendTitle} , #{currentdate} , #{sendNumber} , #{sendMessage} , #{targetNumber} , @return_stat output, @return_clidx output
+		
+		select @return_stat as 'returnStat', @return_clidx as 'returnClidx'
+	</select>
+	
+	<select id="select" parameterType="exts.ciel.sms.vo.CielSmsResultVO" resultType="exts.ciel.sms.vo.CielSmsResultVO">
+		SELECT
+			CLIDX		clidx
+			, CLTNO		cltno
+			, GB		gb
+			, MSGGB		msggb
+			, SENDNUM	sendnum
+			, RECVNUM	recvnum
+			, SCHDDT	schddt
+			, RESULT	result
+			, [STATUS]	status
+			, ERRCODE	errcode
+			, SDT		sdt
+			, EDT		edt
+			, USERID	userid
+			, SUBCODE	subcode
+		FROM
+			view_sendResult
+		WHERE
+			USERID = #{userid}
+			AND SUBCODE = #{subcode}
+			AND CLIDX = #{clidx}
+	</select>
+	
+</mapper>

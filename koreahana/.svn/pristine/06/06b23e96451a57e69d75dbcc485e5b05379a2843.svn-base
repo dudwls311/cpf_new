@@ -1,0 +1,10 @@
+1. tomcat 계정으로 접속
+	]# su - tomcat
+
+2. KSIGN_FILE_DELETE.sh 파일을 /home/cron 경로에 추가 (권한 및 실행권한 설정)
+	]# chown tomcat:tomcat /home/cron/KSIGN_FILE_DELETE.sh
+	]# chmod 700 /home/cron/KSIGN_FILE_DELETE.sh
+
+3. crontab 내용추가 (매일 0분 0시에 복호화 파일 제거)
+	]# crontab -e
+	0 0 * * * /home/cron/KSIGN_FILE_DELETE.sh

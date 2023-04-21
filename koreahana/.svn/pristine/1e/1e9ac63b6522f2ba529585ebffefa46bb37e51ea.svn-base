@@ -1,0 +1,44 @@
+#\uae34\uae09\uc0dd\uacc4\ube44\uc9c0\uc6d0
+exts.item.koreahana.eml = \uae34\uae09\uc0dd\uacc4\ube44\uc9c0\uc6d0
+exts.item.koreahana.eml.sprtSn = \uc9c0\uc6d0\uc77c\ub828\ubc88\ud638
+exts.item.koreahana.eml.hanawonFnshYr = \ud558\ub098\uc6d0\uc218\ub8cc\uc5f0\ub3c4
+exts.item.koreahana.eml.entcnyYmd = \uc785\uad6d\uc5f0\uc6d4\uc77c
+exts.item.koreahana.eml.hnwTh = \ud558\ub098\uc6d0\uae30\uc218
+exts.item.koreahana.eml.dscsnYmd = \uc0c1\ub2f4\uc5f0\uc6d4\uc77c
+exts.item.koreahana.eml.hanactCd = \ud558\ub098\uc13c\ud130
+exts.item.koreahana.eml.cnslFlnm = \uc0c1\ub2f4\uc0ac\uba85
+exts.item.koreahana.eml.eml = \uc774\uba54\uc77c
+exts.item.koreahana.eml.bacntBankCd = \uacc4\uc88c\uc740\ud589
+exts.item.koreahana.eml.actno = \uacc4\uc88c\ubc88\ud638
+exts.item.koreahana.eml.dpstr = \uc608\uae08\uc8fc
+exts.item.koreahana.eml.excvMthdCd = \ubc1c\uad74\ubc29\ubc95
+exts.item.koreahana.eml.excvMthdEtc = \ubc1c\uad74\ubc29\ubc95\uae30\ud0c0
+exts.item.koreahana.eml.frstCnslYmd = \ucd5c\ucd08\uc0c1\ub2f4\uc77c
+
+#\uae34\uae09\uc0dd\uacc4\ube44\uc9c0\uc6d0\ud604\ud669\uad00\ub9ac
+exts.item.koreahana.eml = \uae34\uae09\uc0dd\uacc4\ube44\uc9c0\uc6d0\ud604\ud669\uad00\ub9ac
+exts.item.koreahana.eml.emlvexSprtPrcnMngSn = \uae34\uae09\uc0dd\uacc4\ube44\uc9c0\uc6d0\ud604\ud669\uad00\ub9ac\uc77c\ub828\ubc88\ud638
+exts.item.koreahana.eml.sprtSn = \uc9c0\uc6d0\uc77c\ub828\ubc88\ud638
+exts.item.koreahana.eml.sprtNmtm = \uc9c0\uc6d0\ud69f\uc218
+exts.item.koreahana.eml.sprtAmt = \uc9c0\uc6d0\uae08\uc561
+exts.item.koreahana.eml.emrgSprtSpdmYn = \uae34\uae09\uc9c0\uc6d0\uc218\uae09\uc5ec\ubd80
+exts.item.koreahana.eml.emrgSprtSpdmRsn = \uae34\uae09\uc9c0\uc6d0\uc218\uae09\uc0ac\uc720(\uc720)
+exts.item.koreahana.eml.emrgSprtSpdmNRsn = \uae34\uae09\uc9c0\uc6d0\uc218\uae09\uc0ac\uc720(\ubb34)
+exts.item.koreahana.eml.cycl = \ucc28\uc218
+exts.item.koreahana.eml.aplyAmt = \uc2e0\uccad\uae08\uc561
+exts.item.koreahana.eml.aplyMainCn = \uc2e0\uccad\uc8fc\uc694\ub0b4\uc6a9
+exts.item.koreahana.eml.mainCrssRsn = \uc8fc\uc694\uc704\uae30\uc0ac\uc720
+exts.item.koreahana.eml.dsbltyYn = \uc7a5\uc560\uc5ec\ubd80
+exts.item.koreahana.eml.earnCd = \uc18c\ub4dd\ucf54\ub4dc
+exts.item.koreahana.eml.mbohhCntCd = \uac00\uad6c\uc6d0\uc218\ucf54\ub4dc
+exts.item.koreahana.eml.dwngShapeCd = \uc8fc\uac70\ud615\ud0dc\ucf54\ub4dc
+exts.item.koreahana.eml.utblNpmntCd = \uacf5\uacfc\uae08\uccb4\ub0a9\ucf54\ub4dc
+exts.item.koreahana.eml.crssCd = \uc704\uae30\ucf54\ub4dc
+exts.item.koreahana.eml.totScr = \ucd1d\uc810\uc218
+exts.item.koreahana.eml.giveYmd = \uc9c0\uae09\uc5f0\uc6d4\uc77c
+exts.item.koreahana.eml.giveAmt = \uc9c0\uae09\uae08\uc561
+exts.item.koreahana.eml.bacntBankCd = \uacc4\uc88c\uc740\ud589
+exts.item.koreahana.eml.actno = \uacc4\uc88c\ubc88\ud638
+exts.item.koreahana.eml.dpstr = \uc608\uae08\uc8fc
+exts.item.koreahana.eml.rmrk = \ube44\uace0
+

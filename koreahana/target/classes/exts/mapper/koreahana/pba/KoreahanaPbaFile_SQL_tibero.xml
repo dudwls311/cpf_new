@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.pba.KoreahanaPbaFile">
+		
+	<sql id="KoreahanaPbaFileWhere">
+		WHERE
+			af.DEL_YN = 'N'
+			AND pafm.PBANCRC_SN = #{pbancrcSn}
+		<if test='pbancrcAtchFileMpngSnList != null'>
+			<foreach open="AND pafm.PBANCRC_ATCH_FILE_MPNG_SN IN (" close=")" item="item" index="index" collection="pbancrcAtchFileMpngSnList" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<!--
+		<if test='atchFileSn != null and !atchFileSn.equals("")'>
+			AND ATCH_FILE_SN = #{atchFileSn}
+		</if>
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>
+					AND ATCH_FILE_SN LIKE '%'||#{searchKeyword}||'%'
+				</when>
+				<when test='"1".equals(searchCondition)'>
+					AND ATCH_FILE_SN LIKE '%'||#{searchKeyword}||'%'
+				</when>
+				<when test='"2".equals(searchCondition)'>
+					
+				</when>
+			</choose>
+		</if>
+		-->
+	</sql>
+	<sql id="KoreahanaPbaFileColumn">
+		pafm.PBANCRC_ATCH_FILE_MPNG_SN		pbancrcAtchFileMpngSn		,
+		pafm.ATCH_FILE_SN		atchFileSn		,
+		pafm.PBANCRC_SN		pbancrcSn		,
+		
+		af.ORGNL_ATCH_FILE_NM	orgnlAtchFileNm	,
+		af.ATCH_FILE_NM			atchFileNm		,
+		af.ATCH_FILE_SZ			atchFileSz		,
+		af.ATCH_FILE_EXTN_NM	atchFileExtnNm	,
+		af.ATCH_FILE_PATH_NM	atchFilePathNm 
+	</sql>
+	<sql id="KoreahanaPbaFileTable">
+	    TB_PBANCRC_ATCH_FILE_MPNG pafm
+	    LEFT JOIN TB_ATCH_FILE af ON pafm.ATCH_FILE_SN = af.ATCH_FILE_SN AND af.DEL_YN = 'N'
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.pba.vo.KoreahanaPbaFileVO" resultType="exts.koreahana.pba.vo.KoreahanaPbaFileVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaPbaFileColumn"/>
+				FROM
+					<include refid="KoreahanaPbaFileTable"/>
+				<include refid="KoreahanaPbaFileWhere"/>
+				ORDER BY
+					pafm.PBANCRC_ATCH_FILE_MPNG_SN ASC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.pba.vo.KoreahanaPbaFileVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaPbaFileTable"/>
+		<include refid="KoreahanaPbaFileWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.pba.vo.KoreahanaPbaFileVO" resultType="exts.koreahana.pba.vo.KoreahanaPbaFileVO">
+		SELECT
+			<include refid="KoreahanaPbaFileColumn"/>
+		FROM
+			<include refid="KoreahanaPbaFileTable"/>
+		WHERE
+			af.DEL_YN = 'N'
+			AND pafm.ATCH_FILE_SN = #{atchFileSn}
+			AND pafm.PBANCRC_SN = #{pbancrcSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.pba.vo.KoreahanaPbaFileVO">
+		<selectKey resultType="string" keyProperty="pbancrcAtchFileMpngSn" order="BEFORE">
+			SELECT SEQ_TB_PBANCRC_ATCH_FILE_MPNG.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_PBANCRC_ATCH_FILE_MPNG (
+			PBANCRC_ATCH_FILE_MPNG_SN	,
+			ATCH_FILE_SN				,
+			PBANCRC_SN
+		) VALUES (
+			#{pbancrcAtchFileMpngSn}	,
+			#{atchFileSn}				,
+			#{pbancrcSn}
+		)
+	</insert>
+	
+	<update id="delete" parameterType="exts.koreahana.pba.vo.KoreahanaPbaFileVO">
+		DELETE FROM
+			TB_PBANCRC_ATCH_FILE_MPNG
+		WHERE
+			PBANCRC_ATCH_FILE_MPNG_SN = #{pbancrcAtchFileMpngSn}
+	</update>
+	
+	<update id="deleteList" parameterType="exts.koreahana.pba.vo.KoreahanaPbaFileVO">
+		DELETE FROM
+			TB_PBANCRC_ATCH_FILE_MPNG
+		WHERE
+			1 = 1
+			<foreach open="AND PBANCRC_ATCH_FILE_MPNG_SN IN (" close=")" item="item" index="index" collection="pbancrcAtchFileMpngSnList" separator=",">
+				#{item}
+			</foreach>
+	</update>
+</mapper>

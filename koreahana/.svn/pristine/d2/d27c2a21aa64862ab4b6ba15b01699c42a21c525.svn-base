@@ -1,0 +1,59 @@
+@charset "utf-8";
+.SAMPLE_POP_OFF,
+.SAMPLE_NEXT_OFF,
+.SAMPLE_FILE_ADD_OFF {display:none;}
+.SAMPLE_POP_ON,
+.SAMPLE_NEXT_ON,
+SAMPLE_FILE_ADD_OM {display:block;}
+
+
+ul{list-style:none;margin:0;padding:0;}
+li{list-style:none;}
+a{text-decoration:none;color:inherit;}
+button#PageContentEdit {position: fixed;z-index: 9999;width: 100px;margin: 20px;background: #f1f1f1;color: #b4b4b4;font-size: 14px;border: none;padding: 10px 0;border-radius: 5px;right: 0;bottom: 0;}
+#leftMenu{position: relative;float: left;margin-top: 40px;margin-right: 20px;margin-left: -120px;width: 220px;/* z-index: 9999; */text-align: center;border-top: 1px solid #efefef;}
+#leftMenu h2{position: absolute;width: max-content;bottom: 100%;max-width: 220px;left: 50%;padding-bottom: 10px;color: #255a7b;margin: 0px auto -2px;font-size: 23px;border-bottom: 3px solid #255a7b;text-align:center;transform: translate(-50%,0%);}
+#leftMenu ul.leftMenuList{float:left;width: 100%;text-align: left;border: 1px solid #efefef;border-bottom:0;margin: 20px 0;}
+#leftMenu ul.leftMenuList li{border-bottom: 1px solid #cecece;}
+#leftMenu ul.leftMenuList li.on{background: #3b8a99;}
+#leftMenu ul.leftMenuList li.on li.on{background: #91c0c0;}
+#leftMenu ul.leftMenuList li.on > a{color:#fff;}
+#leftMenu ul.leftMenuList li a{color: #666;display:block;padding: 10px;font-weight: 500;}
+#leftMenu ul.leftMenuList li ul{background:#fff;border-left: 5px solid #f1f1f1;}
+#leftMenu ul.leftMenuList li ul li{border-bottom:0;}
+#leftMenu ul.leftMenuList li ul li a{font-weight:normal;font-size:13px;color:#222;padding:5px 15px;}
+
+div.content_group{float:left;width:740px;background:#bfbfbf;}
+div.content_group div.content_top{float:left;width:720px;margin:10px;background:#efefef;}
+div.content_group div.content_top h3{margin:10px;padding:30px 10px;background:#fff;}
+div.content_group div.content_top span#pageLinkNav{margin:10px;padding:5px;background:#dfdfdf;display:block;}
+div.content_group div.content_top ul.content_util{float:right;margin:0 10px 10px 0;}
+div.content_group div.content_top ul.content_util li{float:left;margin-left:5px;}
+div.content_group div.content_top ul.content_util li p{float:left;margin:0;}
+
+div.content_group div.content{float:left;width:720px;margin:10px;background:#efefef;}
+/*div.content_group div.content p{margin:10px;padding:20px 20px 10px;background:#fff;font-weight:bold;}*/
+
+div.content_group div.content div.qrcode{margin:10px;padding:20px 110px 27px 20px;background:#dfdfdf;font-weight:bold;position:relative;}
+div.content_group div.content div.qrcode p.qr_title{margin:0;padding:0;background:none;}
+div.content_group div.content div.qrcode p.txtQrcode{margin:0;padding:0;background:none;margin:10px;font-size:13px;font-weight:normal;letter-spacing:-1px;}
+div.content_group div.content div.qrcode a{display:block;position:absolute;right:10px;top:10px;border:1px solid #ccc;}
+div.content_group div.content div.qrcode div.qrZoom{position:absolute;right:-1px;top:-1px;border:1px solid #ccc;}
+
+
+div.content_group div.content div.ccl{margin:10px;padding:10px 20px;background:#dfdfdf;font-weight:bold;}
+div.content_group div.content div.ccl a{padding:5px;background:#fafafa;display:block;width:85px;border:1px solid #bbb;float:left;margin-right:10px;}
+div.content_group div.content div.ccl p{margin:0;padding:0;background:none;font-weight:normal;font-size:13px;letter-spacing:-1px;}
+
+div.content_group div.content div.contentAdmin{margin:10px;padding:10px 20px;background:#dfdfdf;}
+div.content_group div.content div.contentAdmin div.adminArea{width:100%;display:inline-block;}
+div.content_group div.content div.contentAdmin div.adminArea dl{margin:0;font-size:12px;letter-spacing:-1px;line-height:200%;}
+div.content_group div.content div.contentAdmin div.adminArea dl dt{font-weight:bold;float:left;margin-right:5px;}
+div.content_group div.content div.contentAdmin div.adminArea dl dd {float: left;margin-right: 30px;}
+
+div.content_group div.content .updateButton button.btn_info {width: 97%; text-align:center;display: block;margin: 0 auto 10px;border: 1px solid #999;background: #cccfd4;height: 30px;font-weight: bold;text-shadow: 1px 1px #fff;}
+
+.board_view .board_v_con .contents,
+.board_content {line-height: 1.4;}
+
+.ui-datepicker .ui-datepicker-title select {width: 40% !important;margin: 1px 3px !important;vertical-align: top;border-radius: 5px;border: 1px solid #ccc;}

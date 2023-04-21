@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.adt.KoreahanaAdtPrc">
+		
+	<sql id="KoreahanaAdtPrcWhere">
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_STTS_CD = #{sprtSttsCd}
+		<if test='pbancrcSn != null and !pbancrcSn.equals("")'>
+			AND s.PBANCRC_SN = #{pbancrcSn}
+		</if>
+		<if test='sprtSn != null and !sprtSn.equals("")'>
+			AND s.SPRT_SN = #{sprtSn}
+		</if>
+		
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>	<!-- 전체 -->
+					AND s.FLNM = FN_CRYPTO_ENC(#{searchKeyword},'${scrKey}')
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaAdtPrcColumn">
+		aaspm.ADTN_AMT_SPRT_PRCN_MNG_SN		adtnAmtSprtPrcnMngSn		,
+		<!-- aaspm.SPRT_SN		sprtSn		,-->
+		aaspm.DSBLTY_DEGR		dsbltyDegr		,
+		aaspm.DSBLTY_SE		dsbltySe		,
+		aaspm.DSBLTY_RMRK		dsbltyRmrk		,
+		aaspm.DSS_NM		dssNm		,
+		aaspm.HSPTZ_PERIOD		hsptzPeriod		,
+		aaspm.HSPTZ_INFO		hsptzInfo		,
+		aaspm.LPERIOD_CURE_RMRK		lperiodCureRmrk		,
+		aaspm.FRST_CHDR_FLNM		frstChdrFlnm		,
+		aaspm.FRST_CHDR_BRDT_YMD		frstChdrBrdtYmd		,
+		aaspm.FRST_CHDR_BRTH_NTN_NM		frstChdrBrthNtnNm		,
+		aaspm.SCNDRY_CHDR_FLNM		scndryChdrFlnm		,
+		aaspm.SCNDRY_CHDR_BRDT_YMD		scndryChdrBrdtYmd		,
+		aaspm.SCNDRY_CHDR_BRTH_NTN_NM		scndryChdrBrthNtnNm		,
+		aaspm.CHDR_NTRE_RMRK		chdrNtreRmrk		,
+		aaspm.GIVE_DCSN_YMD		giveDcsnYmd		,
+		aaspm.FRST_DCSN_AMT		frstDcsnAmt		,
+		aaspm.GIVE_BGNG_YM		giveBgngYm		,
+		aaspm.GIVE_END_YM		giveEndYm		,
+		aaspm.TOT_GIVE_NMTM		totGiveNmtm		,
+		aaspm.BACNT_BANK_CD		bacntBankCd		,
+		FN_CRYPTO_DEC(aaspm.ACTNO,'${scrKey}')		actno		,
+		aaspm.DPSTR		dpstr		,
+		aaspm.GIVE_TRMN_YMD		giveTrmnYmd		,
+		aaspm.TRMN_RSN		trmnRsn		,
+<!-- 		aaspm.RGTR_ID             rgtrId  ,
+		aaspm.MDFR_ID            mdfrId ,
+		aaspm.REG_DT                regDt    ,
+		aaspm.MDFCN_DT               mdfcnDt   ,
+		aaspm.DEL_YN                  delYn ,  -->
+		
+	    s.SPRT_SN	sprtSn		,
+		FN_CRYPTO_DEC(s.FLNM,'${scrKey}')		flnm		,
+		s.GENDER_CD	genderCd	,
+		FN_CRYPTO_DEC(s.BRDT_YMD,'${scrKey}')	brdtYmd		,
+		FN_CRYPTO_DEC(s.MBPHNO,'${scrKey}')		mbphno		,
+		FN_CRYPTO_DEC(s.ZIP,'${scrKey}')		zip		,
+		FN_CRYPTO_DEC(s.ADDR,'${scrKey}')		addr		,
+		FN_CRYPTO_DEC(s.DADDR,'${scrKey}')		daddr		,
+		s.SPRT_STTS_CD		sprtSttsCd		,
+		s.RSN		rsn		,
+		s.RGTR_ID             rgtrId  ,
+		s.MDFR_ID            mdfrId ,
+		s.REG_DT                regDt    ,
+		s.MDFCN_DT               mdfcnDt   ,
+		
+		p.BIZ_SE_CD       bizSeCd    ,
+		
+		(SELECT AGGR_CONCAT(a.RND||'^'||a.GIVE_YM||'^'||a.GIVE_AMT,',') FROM TB_ADTN_AMT_SPRT_PRCN_MNG_RND a WHERE a.SPRT_SN = s.SPRT_SN)		rndConcat		,
+		
+		aas.ADTN_AMT_GIVE_RSN		adtnAmtGiveRsn		,
+		
+		FN_CRYPTO_DEC(ma.NTKRDF_UNQ_NO,'${scrKey}')		ntkrdfUnqNo ,
+		ma.HANAWON_TH		hanawonTh		,
+		ma.ENTCNY_YMD			entcnyYmd	,
+		ma.PRTDCS_YMD			prtdcsYmd	,
+		ma.HANAWON_FNSH_YMD	hanawonFnshYmd
+	</sql>
+	<sql id="KoreahanaAdtPrcTable">
+		TB_SPRT s
+		INNER JOIN TB_PBANCRC p ON (s.PBANCRC_SN = p.PBANCRC_SN AND p.DEL_YN = 'N')
+	    LEFT JOIN TB_ADTN_AMT_SPRT aas ON (s.SPRT_SN = aas.SPRT_SN)
+	    LEFT JOIN TB_ADTN_AMT_SPRT_PRCN_MNG aaspm ON (s.SPRT_SN = aaspm.SPRT_SN AND aaspm.DEL_YN = 'N')
+	    LEFT JOIN TB_MBR_ADTIFM ma ON (s.RGTR_ID = ma.MBR_ID)
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.adt.vo.KoreahanaAdtPrcVO" resultType="exts.koreahana.adt.vo.KoreahanaAdtPrcVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaAdtPrcColumn"/>
+				FROM
+					<include refid="KoreahanaAdtPrcTable"/>
+				<include refid="KoreahanaAdtPrcWhere"/>
+				ORDER BY
+					s.SPRT_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.adt.vo.KoreahanaAdtPrcVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaAdtPrcTable"/>
+		<include refid="KoreahanaAdtPrcWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.adt.vo.KoreahanaAdtPrcVO" resultType="exts.koreahana.adt.vo.KoreahanaAdtPrcVO">
+		SELECT
+			<include refid="KoreahanaAdtPrcColumn"/>
+		FROM
+			<include refid="KoreahanaAdtPrcTable"/>
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_STTS_CD = #{sprtSttsCd}
+			AND s.SPRT_SN = #{sprtSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.adt.vo.KoreahanaAdtPrcVO">
+		<selectKey resultType="string" keyProperty="adtnAmtSprtPrcnMngSn" order="BEFORE">
+			SELECT SEQ_TB_ADTN_AMT_SPRT_PRCN_MNG.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_ADTN_AMT_SPRT_PRCN_MNG (
+			ADTN_AMT_SPRT_PRCN_MNG_SN		,
+			SPRT_SN		,
+			DSBLTY_DEGR		,
+			DSBLTY_SE		,
+			DSBLTY_RMRK		,
+			DSS_NM		,
+			HSPTZ_PERIOD		,
+			HSPTZ_INFO		,
+			LPERIOD_CURE_RMRK		,
+			FRST_CHDR_FLNM		,
+			FRST_CHDR_BRDT_YMD		,
+			FRST_CHDR_BRTH_NTN_NM		,
+			SCNDRY_CHDR_FLNM		,
+			SCNDRY_CHDR_BRDT_YMD		,
+			SCNDRY_CHDR_BRTH_NTN_NM		,
+			CHDR_NTRE_RMRK		,
+			GIVE_DCSN_YMD		,
+			FRST_DCSN_AMT		,
+			GIVE_BGNG_YM		,
+			GIVE_END_YM		,
+			TOT_GIVE_NMTM		,
+			BACNT_BANK_CD		,
+			ACTNO		,
+			DPSTR		,
+			GIVE_TRMN_YMD		,
+			TRMN_RSN		,
+
+			RGTR_ID     ,
+			MDFR_ID       ,
+			REG_DT        ,
+			MDFCN_DT        ,
+			DEL_YN
+		) VALUES (
+			#{adtnAmtSprtPrcnMngSn}		,
+			#{sprtSn}		,
+			#{dsbltyDegr}		,
+			#{dsbltySe}		,
+			#{dsbltyRmrk}		,
+			#{dssNm}		,
+			#{hsptzPeriod}		,
+			#{hsptzInfo}		,
+			#{lperiodCureRmrk}		,
+			#{frstChdrFlnm}		,
+			REPLACE(REPLACE(#{frstChdrBrdtYmd},'-',''),'.','')		,
+			#{frstChdrBrthNtnNm}		,
+			#{scndryChdrFlnm}		,
+			REPLACE(REPLACE(#{scndryChdrBrdtYmd},'-',''),'.','')		,
+			#{scndryChdrBrthNtnNm}		,
+			#{chdrNtreRmrk}		,
+			REPLACE(REPLACE(#{giveDcsnYmd},'-',''),'.','')		,
+			#{frstDcsnAmt}		,
+			REPLACE(REPLACE(#{giveBgngYm},'-',''),'.','')		,
+			REPLACE(REPLACE(#{giveEndYm},'-',''),'.','')		,
+			#{totGiveNmtm}		,
+			#{bacntBankCd}		,
+			FN_CRYPTO_ENC(#{actno},'${scrKey}')		,
+			#{dpstr}		,
+			REPLACE(REPLACE(#{giveTrmnYmd},'-',''),'.','')		,
+			#{trmnRsn}		,
+
+			#{rgtrId}   ,
+			#{mdfrId}     ,
+			SYSDATE     ,
+			SYSDATE     ,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.adt.vo.KoreahanaAdtPrcVO">
+		UPDATE 
+			TB_ADTN_AMT_SPRT_PRCN_MNG
+		SET
+			SPRT_SN	=	#{sprtSn}		,
+			DSBLTY_DEGR	=	#{dsbltyDegr}		,
+			DSBLTY_SE	=	#{dsbltySe}		,
+			DSBLTY_RMRK	=	#{dsbltyRmrk}		,
+			DSS_NM	=	#{dssNm}		,
+			HSPTZ_PERIOD	=	#{hsptzPeriod}		,
+			HSPTZ_INFO	=	#{hsptzInfo}		,
+			LPERIOD_CURE_RMRK	=	#{lperiodCureRmrk}		,
+			FRST_CHDR_FLNM	=	#{frstChdrFlnm}		,
+			FRST_CHDR_BRDT_YMD	=	REPLACE(REPLACE(#{frstChdrBrdtYmd},'-',''),'.','')		,
+			FRST_CHDR_BRTH_NTN_NM	=	#{frstChdrBrthNtnNm}		,
+			SCNDRY_CHDR_FLNM	=	#{scndryChdrFlnm}		,
+			SCNDRY_CHDR_BRDT_YMD	=	REPLACE(REPLACE(#{scndryChdrBrdtYmd},'-',''),'.','')		,
+			SCNDRY_CHDR_BRTH_NTN_NM	=	#{scndryChdrBrthNtnNm}		,
+			CHDR_NTRE_RMRK	=	#{chdrNtreRmrk}		,
+			GIVE_DCSN_YMD	=	REPLACE(REPLACE(#{giveDcsnYmd},'-',''),'.','')		,
+			FRST_DCSN_AMT	=	#{frstDcsnAmt}		,
+			GIVE_BGNG_YM	=	REPLACE(REPLACE(#{giveBgngYm},'-',''),'.','')		,
+			GIVE_END_YM	=	REPLACE(REPLACE(#{giveEndYm},'-',''),'.','')		,
+			TOT_GIVE_NMTM	=	#{totGiveNmtm}		,
+			BACNT_BANK_CD	=	#{bacntBankCd}		,
+			ACTNO	=	FN_CRYPTO_ENC(#{actno},'${scrKey}')		,
+			DPSTR	=	#{dpstr}		,
+			GIVE_TRMN_YMD	=	REPLACE(REPLACE(#{giveTrmnYmd},'-',''),'.','')		,
+			TRMN_RSN	=	#{trmnRsn}		,
+
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND SPRT_SN = #{sprtSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.adt.vo.KoreahanaAdtPrcVO">
+		UPDATE
+			TB_ADTN_AMT_SPRT_PRCN_MNG
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND ADTN_AMT_SPRT_PRCN_MNG_SN = #{adtnAmtSprtPrcnMngSn}
+	</update>
+	
+	
+	
+	<select id="selectStatisticMonth" parameterType="egovMap" resultType="egovMap">
+		SELECT
+			p.BIZ_SE_CD,
+			SUM(aaspmr.GIVE_AMT) GIVE_AMT,
+			COUNT(aaspmr.GIVE_AMT) GIVE_CNT,
+			SUBSTR(aaspmr.GIVE_YM,5,2) GIVE_YM
+		FROM
+			TB_SPRT s
+			JOIN TB_PBANCRC p ON (s.PBANCRC_SN = p.PBANCRC_SN AND p.DEL_YN = 'N')
+			JOIN TB_ADTN_AMT_SPRT aas ON (s.SPRT_SN = aas.SPRT_SN)
+			JOIN TB_ADTN_AMT_SPRT_PRCN_MNG aaspm ON (s.SPRT_SN = aaspm.SPRT_SN AND aaspm.DEL_YN = 'N')
+			JOIN TB_ADTN_AMT_SPRT_PRCN_MNG_RND aaspmr ON (s.SPRT_SN = aaspmr.SPRT_SN)
+		WHERE
+			s.DEL_YN = 'N'
+			AND SUBSTR(aaspmr.GIVE_YM,0,4) = #{searchYear}
+		GROUP BY
+			ROLLUP(SUBSTR(aaspmr.GIVE_YM,5,2),p.BIZ_SE_CD)
+		ORDER BY 
+			SUBSTR(aaspmr.GIVE_YM,5,2)
+	</select>
+	
+	<select id="selectStatisticYear" parameterType="egovMap" resultType="egovMap">
+		SELECT
+			p.BIZ_SE_CD ,
+			SUM(aaspmr.GIVE_AMT) GIVE_AMT,
+			COUNT(aaspmr.GIVE_AMT) GIVE_CNT,
+			SUBSTR(aaspmr.GIVE_YM,0,4) GIVE_YM
+		FROM
+			TB_SPRT s
+			JOIN TB_PBANCRC p ON (s.PBANCRC_SN = p.PBANCRC_SN AND p.DEL_YN = 'N')
+			JOIN TB_ADTN_AMT_SPRT aas ON (s.SPRT_SN = aas.SPRT_SN)
+			JOIN TB_ADTN_AMT_SPRT_PRCN_MNG aaspm ON (s.SPRT_SN = aaspm.SPRT_SN AND aaspm.DEL_YN = 'N')
+			JOIN TB_ADTN_AMT_SPRT_PRCN_MNG_RND aaspmr ON (s.SPRT_SN = aaspmr.SPRT_SN)
+		WHERE
+			s.DEL_YN = 'N'
+			AND aaspmr.GIVE_YM IS NOT NULL
+		GROUP BY
+			ROLLUP(p.BIZ_SE_CD, SUBSTR(aaspmr.GIVE_YM,0,4))
+		ORDER BY 
+			SUBSTR(aaspmr.GIVE_YM,0,4)
+	</select>
+	
+	<select id="selectStatisticYearDegr" parameterType="egovMap" resultType="egovMap">
+		SELECT
+			COUNT(aaspm.GIVE_DCSN_YMD) GIVE_DCSN_CNT,
+			SUBSTR(aaspm.GIVE_DCSN_YMD,0,4) GIVE_DCSN_YEAR,
+			aaspm.DSBLTY_DEGR
+		FROM
+			TB_SPRT s
+			JOIN TB_PBANCRC p ON (s.PBANCRC_SN = p.PBANCRC_SN AND p.DEL_YN = 'N')
+			JOIN TB_ADTN_AMT_SPRT aas ON (s.SPRT_SN = aas.SPRT_SN)
+			JOIN TB_ADTN_AMT_SPRT_PRCN_MNG aaspm ON (s.SPRT_SN = aaspm.SPRT_SN AND aaspm.DEL_YN = 'N')
+		WHERE
+			s.DEL_YN = 'N'
+			AND aaspm.GIVE_DCSN_YMD IS NOT NULL
+			AND aaspm.DSBLTY_DEGR IS NOT NULL
+		GROUP BY
+			ROLLUP(SUBSTR(aaspm.GIVE_DCSN_YMD,0,4),	aaspm.DSBLTY_DEGR)
+		ORDER BY 
+			SUBSTR(aaspm.GIVE_DCSN_YMD,0,4)
+	</select>
+	
+	<select id="selectStatisticYearPeriod" parameterType="egovMap" resultType="egovMap">
+		SELECT
+			COUNT(aaspm.GIVE_DCSN_YMD) GIVE_DCSN_CNT,
+			SUBSTR(aaspm.GIVE_DCSN_YMD,0,4) GIVE_DCSN_YEAR,
+			aaspm.HSPTZ_PERIOD
+		FROM
+			TB_SPRT s
+			JOIN TB_PBANCRC p ON (s.PBANCRC_SN = p.PBANCRC_SN AND p.DEL_YN = 'N')
+			JOIN TB_ADTN_AMT_SPRT aas ON (s.SPRT_SN = aas.SPRT_SN)
+			JOIN TB_ADTN_AMT_SPRT_PRCN_MNG aaspm ON (s.SPRT_SN = aaspm.SPRT_SN AND aaspm.DEL_YN = 'N')
+		WHERE
+			s.DEL_YN = 'N'
+			AND aaspm.GIVE_DCSN_YMD IS NOT NULL
+			AND aaspm.FRST_CHDR_BRDT_YMD IS NOT NULL
+		GROUP BY
+			ROLLUP(SUBSTR(aaspm.GIVE_DCSN_YMD,0,4), aaspm.HSPTZ_PERIOD )
+		ORDER BY 
+			SUBSTR(aaspm.GIVE_DCSN_YMD,0,4)
+	</select>
+	
+	<select id="selectStatisticYearAge" parameterType="egovMap" resultType="egovMap">
+		SELECT
+			SUM(giveDscnCnt) GIVE_DCSN_CNT,
+			giveDscnYear GIVE_DCSN_YEAR,
+			ageType AGE_TYPE
+		FROM
+		(
+			SELECT
+				'FRST' child,
+				COUNT(aaspm.GIVE_DCSN_YMD) giveDscnCnt,
+				SUBSTR(aaspm.GIVE_DCSN_YMD,0,4) giveDscnYear,
+				FN_GET_ADT_AGE(aaspm.GIVE_DCSN_YMD,aaspm.FRST_CHDR_BRDT_YMD) ageType
+			FROM
+				TB_SPRT s
+				JOIN TB_PBANCRC p ON (s.PBANCRC_SN = p.PBANCRC_SN AND p.DEL_YN = 'N')
+				JOIN TB_ADTN_AMT_SPRT aas ON (s.SPRT_SN = aas.SPRT_SN)
+				JOIN TB_ADTN_AMT_SPRT_PRCN_MNG aaspm ON (s.SPRT_SN = aaspm.SPRT_SN AND aaspm.DEL_YN = 'N')
+			WHERE
+				s.DEL_YN = 'N'
+				AND aaspm.GIVE_DCSN_YMD IS NOT NULL
+				AND aaspm.FRST_CHDR_BRDT_YMD IS NOT NULL
+			GROUP BY
+				SUBSTR(aaspm.GIVE_DCSN_YMD,0,4),	
+				FN_GET_ADT_AGE(aaspm.GIVE_DCSN_YMD,aaspm.FRST_CHDR_BRDT_YMD)
+			UNION ALL
+				
+			SELECT
+				'SCNDRY' child,
+				COUNT(aaspm.GIVE_DCSN_YMD) giveDscnCnt,
+				SUBSTR(aaspm.GIVE_DCSN_YMD,0,4) giveDscnYear,
+				FN_GET_ADT_AGE(aaspm.GIVE_DCSN_YMD,aaspm.SCNDRY_CHDR_BRDT_YMD) ageType
+			FROM
+				TB_SPRT s
+				JOIN TB_PBANCRC p ON (s.PBANCRC_SN = p.PBANCRC_SN AND p.DEL_YN = 'N')
+				JOIN TB_ADTN_AMT_SPRT aas ON (s.SPRT_SN = aas.SPRT_SN)
+				JOIN TB_ADTN_AMT_SPRT_PRCN_MNG aaspm ON (s.SPRT_SN = aaspm.SPRT_SN AND aaspm.DEL_YN = 'N')
+			WHERE
+				s.DEL_YN = 'N'
+				AND aaspm.GIVE_DCSN_YMD IS NOT NULL
+				AND aaspm.SCNDRY_CHDR_BRDT_YMD IS NOT NULL
+			GROUP BY
+				SUBSTR(aaspm.GIVE_DCSN_YMD,0,4),	
+				FN_GET_ADT_AGE(aaspm.GIVE_DCSN_YMD,aaspm.SCNDRY_CHDR_BRDT_YMD)
+			)
+		GROUP BY
+			ROLLUP(giveDscnYear, ageType )
+		ORDER BY
+			giveDscnYear
+	</select>
+	
+	
+	
+	<select id="selectListExcel" parameterType="exts.koreahana.adt.vo.KoreahanaAdtPrcVO" resultType="exts.koreahana.adt.vo.KoreahanaAdtPrcVO">
+	
+		SELECT
+			<include refid="KoreahanaAdtPrcColumn"/> ,
+			<include refid="exts.mapper.com.ComMbr.mbrAdtColumn"/>
+			
+			, (SELECT AGGR_CONCAT(a.FAM_FLNM||'('||FN_GETCDNM(a.APLCNT_REL_CD)||')',',') FROM TB_ADTN_AMT_SPRT_FAM_REL a WHERE a.SPRT_SN = s.SPRT_SN)		adtFamConcat
+		FROM
+			<include refid="KoreahanaAdtPrcTable"/>
+			<include refid="exts.mapper.com.ComMbr.mbrAdtTable"/>
+		<include refid="KoreahanaAdtPrcWhere"/>
+		ORDER BY
+			s.SPRT_SN DESC
+	</select>
+</mapper>

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.sgn.KoreahanaSgn">
+		
+	<sql id="KoreahanaSgnWhere">
+		WHERE
+			s.DEL_YN = 'N'
+			AND af.RGTR_ID = #{rgtrId}
+		<!--
+		<if test='atchFileSn != null and !atchFileSn.equals("")'>
+			AND ATCH_FILE_SN = #{atchFileSn}
+		</if>
+		<if test='sgntNm != null and !sgntNm.equals("")'>
+			AND SGNT_NM = #{sgntNm}
+		</if>
+		<if test='delYn != null and !delYn.equals("")'>
+			AND DEL_YN = #{delYn}
+		</if>
+		-->
+		<if test='sgntFavoYn != null and !sgntFavoYn.equals("")'>
+			AND SGNT_FAVO_YN = #{sgntFavoYn}
+		</if>
+		<if test='atchFileSnList != null'>
+			<foreach open="AND db.ATCH_FILE_SN IN (" close=")" item="item" index="index" collection="atchFileSnList" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"1".equals(searchCondition)'>	<!-- 제목 -->
+					AND s.SGNT_NM LIKE '%'||#{searchKeyword}||'%'
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaSgnColumn">
+		s.SGNT_SN		sgntSn		,
+		s.ATCH_FILE_SN		atchFileSn		,
+		s.SGNT_NM		sgntNm		,
+		s.SGNT_FAVO_YN  sgntFavoYn	,
+		s.DEL_YN		delYn		,
+
+		af.ATCH_FILE_SN			atchFileSn		,
+		af.ORGNL_ATCH_FILE_NM	orgnlAtchFileNm	,
+		af.ATCH_FILE_NM			atchFileNm		,
+		af.ATCH_FILE_SZ			atchFileSz		,
+		af.ATCH_FILE_EXTN_NM	atchFileExtnNm	,
+		af.ATCH_FILE_PATH_NM	atchFilePathNm  ,
+		af.RGTR_ID             	rgtrId          ,
+		af.MDFR_ID             	mdfrId          ,
+		af.REG_DT              	regDt           ,
+		af.MDFCN_DT            	mdfcnDt
+	</sql>
+	<sql id="KoreahanaSgnTable">
+	    TB_SGNT s
+	    LEFT JOIN TB_ATCH_FILE af ON s.ATCH_FILE_SN = af.ATCH_FILE_SN AND af.DEL_YN = 'N'
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.sgn.vo.KoreahanaSgnVO" resultType="exts.koreahana.sgn.vo.KoreahanaSgnVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaSgnColumn"/>
+				FROM
+					<include refid="KoreahanaSgnTable"/>
+				<include refid="KoreahanaSgnWhere"/>
+				ORDER BY
+					s.SGNT_FAVO_YN DESC, s.SGNT_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.sgn.vo.KoreahanaSgnVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaSgnTable"/>
+		<include refid="KoreahanaSgnWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.sgn.vo.KoreahanaSgnVO" resultType="exts.koreahana.sgn.vo.KoreahanaSgnVO">
+		SELECT
+			<include refid="KoreahanaSgnColumn"/>
+		FROM
+			<include refid="KoreahanaSgnTable"/>
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SGNT_SN = #{sgntSn}
+			AND af.RGTR_ID = #{rgtrId}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.sgn.vo.KoreahanaSgnVO">
+		<selectKey resultType="string" keyProperty="sgntSn" order="BEFORE">
+			SELECT SEQ_TB_SGNT.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_SGNT (
+			SGNT_SN		,
+			ATCH_FILE_SN		,
+			SGNT_NM		,
+			SGNT_FAVO_YN  ,
+			DEL_YN
+		) VALUES (
+			#{sgntSn}		,
+			#{atchFileSn}		,
+			#{sgntNm}		,
+			#{sgntFavoYn}	,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.sgn.vo.KoreahanaSgnVO">
+		UPDATE 
+			TB_SGNT
+		SET
+			SGNT_NM	=	#{sgntNm} ,
+			SGNT_FAVO_YN = #{sgntFavoYn}
+		WHERE
+			1 = 1
+			AND SGNT_SN = #{sgntSn}
+	</update>
+	
+	<update id="updateFavoChg" parameterType="exts.koreahana.sgn.vo.KoreahanaSgnVO">
+		UPDATE 
+			TB_SGNT
+		SET
+			SGNT_FAVO_YN = 'Y'
+		WHERE
+			1 = 1
+			AND SGNT_SN = #{sgntSn}
+	</update>
+	
+	<update id="updateFavoReset" parameterType="exts.koreahana.sgn.vo.KoreahanaSgnVO">
+		UPDATE 
+			TB_SGNT
+		SET
+			SGNT_FAVO_YN = 'N'
+		WHERE
+			ATCH_FILE_SN IN (
+				SELECT
+					s.ATCH_FILE_SN
+				FROM
+					TB_SGNT s
+	    			LEFT JOIN TB_ATCH_FILE af ON s.ATCH_FILE_SN = af.ATCH_FILE_SN AND af.DEL_YN = 'N'
+				WHERE 
+					af.ATCH_FILE_SN = s. ATCH_FILE_SN
+					AND s.DEL_YN = 'N'
+					AND af.RGTR_ID = #{rgtrId}
+			)
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.sgn.vo.KoreahanaSgnVO">
+		UPDATE
+			TB_SGNT
+		SET
+			DEL_YN             = 'Y'
+		WHERE
+			1 = 1
+			AND SGNT_SN = #{sgntSn}
+	</update>	
+</mapper>

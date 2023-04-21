@@ -1,0 +1,26 @@
+#\uc815\ucc29\uc9c0\uc6d0
+exts.item.koreahana.spf = \uc815\ucc29\uc9c0\uc6d0
+exts.item.koreahana.spf.sprtSn = \uc9c0\uc6d0\uc77c\ub828\ubc88\ud638
+exts.item.koreahana.spf.photoFileSn = \uc0ac\uc9c4\ud30c\uc77c
+exts.item.koreahana.spf.ordpNm = \uc18c\uc18d
+exts.item.koreahana.spf.crtfctRcvZip = \uc790\uaca9\uc99d\uc218\ub839 \uc6b0\ud3b8\ubc88\ud638
+exts.item.koreahana.spf.crtfctRcvAddr = \uc790\uaca9\uc99d\uc218\ub839 \uc8fc\uc18c
+exts.item.koreahana.spf.crtfctRcvDaddr = \uc790\uaca9\uc99d\uc218\ub839 \uc0c1\uc138\uc8fc\uc18c
+exts.item.koreahana.spf.eml = \uc774\uba54\uc77c\uc8fc\uc18c
+exts.item.koreahana.spf.lastAcbgCd = \ucd5c\uc885\ud559\ub825
+exts.item.koreahana.spf.lastAcbgEtc = \ucd5c\uc885\ud559\ub825 \uae30\ud0c0
+exts.item.koreahana.spf.ocptInstTypeCd = \uc885\uc0ac\uae30\uad00\uc720\ud615
+exts.item.koreahana.spf.ocptInstTypeEtc = \uc885\uc0ac\uae30\uad00\uc720\ud615 \uae30\ud0c0
+exts.item.koreahana.spf.ptexp = \uc2e4\ubb34\uacbd\ub825
+exts.item.koreahana.spf.aplyMtv = \uc2e0\uccad\ub3d9\uae30
+exts.item.koreahana.spf.eduFnshYmd = \uc218\ub8cc\uc77c
+exts.item.koreahana.spf.sgntFileSn = \uc11c\uba85\ud30c\uc77c
+exts.item.koreahana.spf.sgntrFlnm = \uc11c\uba85\uc790\uc774\ub984
+
+#\uc815\ucc29\uc9c0\uc6d0\ud604\ud669\uad00\ub9ac
+exts.item.koreahana.spf = \uc815\ucc29\uc9c0\uc6d0\ud604\ud669\uad00\ub9ac
+exts.item.koreahana.spf.spfstPrcnMngSn = \uc815\ucc29\uc9c0\uc6d0\ud604\ud669\uad00\ub9ac\uc77c\ub828\ubc88\ud638
+exts.item.koreahana.spf.sprtSn = \uc9c0\uc6d0\uc77c\ub828\ubc88\ud638
+exts.item.koreahana.spf.exslno = \uc751\uc2dc\ubc88\ud638
+exts.item.koreahana.spf.testRsltCd = \uc2dc\ud5d8\uacb0\uacfc\ucf54\ub4dc
+exts.item.koreahana.spf.passYmd = \ud569\uaca9\uc5f0\uc6d4\uc77c

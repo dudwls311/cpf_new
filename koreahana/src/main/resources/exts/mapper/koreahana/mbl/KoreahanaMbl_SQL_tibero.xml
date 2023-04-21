@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.mbl.KoreahanaMbl">
+		
+	<sql id="KoreahanaMblWhere">
+		WHERE
+			DEL_YN = 'N'
+		<!--
+		<if test='vldDt != null and !vldDt.equals("")'>
+			AND VLD_DT = #{vldDt}
+		</if>
+		<if test='vldExtn != null and !vldExtn.equals("")'>
+			AND VLD_EXTN = #{vldExtn}
+		</if>
+		<if test='atchFileSn != null and !atchFileSn.equals("")'>
+			AND ATCH_FILE_SN = #{atchFileSn}
+		</if>
+		<if test='uldDt != null and !uldDt.equals("")'>
+			AND ULD_DT = #{uldDt}
+		</if>
+
+		-->
+		
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>	<!-- 전체 -->
+					AND VLD_DT LIKE '%'||#{searchKeyword}||'%'
+				</when>
+				<when test='"1".equals(searchCondition)'>	<!-- 제목 -->
+					AND VLD_DT LIKE '%'||#{searchKeyword}||'%'
+				</when>
+				<when test='"2".equals(searchCondition)'>	<!-- 내용 -->
+					
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaMblColumn">
+		MBL_ULD_SN		mblUldSn		,
+		VLD_DT		vldDt		,
+		VLD_EXTN		vldExtn		,
+		ATCH_FILE_SN		atchFileSn		,
+
+		RGTR_ID             rgtrId  ,
+		MDFR_ID            mdfrId ,
+		REG_DT                regDt    ,
+		MDFCN_DT               mdfcnDt   ,
+		DEL_YN                  delYn 
+	</sql>
+	<sql id="KoreahanaMblTable">
+	    TB_MBL_ULD
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.mbl.vo.KoreahanaMblVO" resultType="exts.koreahana.mbl.vo.KoreahanaMblVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaMblColumn"/>
+				FROM
+					<include refid="KoreahanaMblTable"/>
+				<include refid="KoreahanaMblWhere"/>
+				ORDER BY
+					MBL_ULD_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.mbl.vo.KoreahanaMblVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaMblTable"/>
+		<include refid="KoreahanaMblWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.mbl.vo.KoreahanaMblVO" resultType="exts.koreahana.mbl.vo.KoreahanaMblVO">
+		SELECT
+			<include refid="KoreahanaMblColumn"/>
+		FROM
+			<include refid="KoreahanaMblTable"/>
+		WHERE
+			DEL_YN = 'N'
+			AND MBL_ULD_SN = #{mblUldSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.mbl.vo.KoreahanaMblVO">
+		<selectKey resultType="string" keyProperty="mblUldSn" order="BEFORE">
+			SELECT SEQ_TB_MBL_ULD.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_MBL_ULD (
+			MBL_ULD_SN		,
+			VLD_DT		,
+			VLD_EXTN		,
+			ATCH_FILE_SN		,
+
+			RGTR_ID     ,
+			MDFR_ID       ,
+			REG_DT        ,
+			MDFCN_DT        ,
+			DEL_YN
+		) VALUES (
+			#{mblUldSn}		,
+ 			#{vldDt}		,
+			#{vldExtn}		,
+			#{atchFileSn}		,
+
+			#{rgtrId}   ,
+			#{mdfrId}     ,
+			SYSDATE     ,
+			SYSDATE     ,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.mbl.vo.KoreahanaMblVO">
+		UPDATE 
+			TB_MBL_ULD
+		SET
+			ATCH_FILE_SN	=	#{atchFileSn}		,
+			<!-- 
+			VLD_DT	=	#{vldDt}		,
+			VLD_EXTN	=	#{vldExtn}		,
+			ULD_DT	=	#{uldDt}		,
+			MDFR_ID       = #{mdfrId}    ,
+			-->
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND MBL_ULD_SN = #{mblUldSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.mbl.vo.KoreahanaMblVO">
+		UPDATE
+			TB_MBL_ULD
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND MBL_ULD_SN = #{mblUldSn}
+	</update>	
+</mapper>

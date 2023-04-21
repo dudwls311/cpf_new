@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.emp.KoreahanaEmpPrc">
+		
+	<sql id="KoreahanaEmpPrcWhere">
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_STTS_CD = #{sprtSttsCd}
+		<if test='pbancrcSn != null and !pbancrcSn.equals("")'>		<!-- 모집공고 -->
+			AND p.PBANCRC_SN = #{pbancrcSn}
+		</if>
+		<if test='bizSeCd != null and !bizSeCd.equals("")'>			<!-- 사업구분 -->
+			AND p.BIZ_SE_CD = #{bizSeCd}
+		</if>
+		<if test='sprtSttsCd != null and !sprtSttsCd.equals("")'>	<!-- 지원상태 -->
+			AND s.SPRT_STTS_CD = #{sprtSttsCd}
+		</if>
+		<if test='regDtYr != null and !regDtYr.equals("")'>			<!-- 신청연도 -->
+			AND TO_CHAR(s.REG_DT, 'YYYY') = #{regDtYr}
+		</if>
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>			<!-- 지원대상 이름 -->
+					AND s.FLNM = FN_CRYPTO_ENC(#{searchKeyword},'${scrKey}')
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaEmpPrcColumn">
+		s.SPRT_SN	sprtSn		,
+		FN_CRYPTO_DEC(s.FLNM,'${scrKey}')		flnm		,
+		s.GENDER_CD	genderCd	,
+		FN_CRYPTO_DEC(s.BRDT_YMD,'${scrKey}')	brdtYmd		,
+		FN_CRYPTO_DEC(s.MBPHNO,'${scrKey}')		mbphno		,
+		FN_CRYPTO_DEC(s.ZIP,'${scrKey}')		zip		,
+		FN_CRYPTO_DEC(s.ADDR,'${scrKey}')		addr		,
+		FN_CRYPTO_DEC(s.DADDR,'${scrKey}')		daddr		,
+		s.SPRT_STTS_CD		sprtSttsCd		,
+		s.RSN		rsn		,
+		s.RGTR_ID             rgtrId  ,
+		s.MDFR_ID            mdfrId ,
+		s.REG_DT                regDt    ,
+		s.MDFCN_DT               mdfcnDt   ,
+		s.DEL_YN                  delYn   ,
+		
+        p.PBANCRC_SN		pbancrcSn		,
+		p.PBANCRC_CTGRY_FRST_CD		pbancrcCtgryFrstCd		,
+		p.BIZ_SE_CD       bizSeCd    ,
+		p.RLS_YN          rlsYn      ,
+		p.PBANCRC_NM		pbancrcNm		,
+		p.PBANCRC_CN		pbancrcCn		,
+		p.INQ_CNT		inqCnt		,
+		p.PBANCRC_BGNG_DT		pbancrcBgngDt ,
+		p.PBANCRC_END_DT		pbancrcEndDt ,
+		FN_GET_PBANCRC_STTS(p.PBANCRC_BGNG_DT, p.PBANCRC_END_DT) pbancrcSttsCd	,
+	
+		FN_CRYPTO_DEC(ma.NTKRDF_UNQ_NO,'${scrKey}')		ntkrdfUnqNo ,
+		ma.HANAWON_TH		hanawonTh		,
+		ma.ENTCNY_YMD			entcnyYmd	,
+		ma.PRTDCS_YMD			prtdcsYmd	,
+		ma.HANAWON_FNSH_YMD	hanawonFnshYmd	,
+	
+		ev.LAST_ACBG_SCHL_NM		lastAcbgSchlNm		,
+		ev.LAST_ACBG_SCHL_GRDTN_CD		lastAcbgSchlGrdtnCd		,
+		ev.LAST_ACBG_MJR_NM		lastAcbgMjrNm		,
+		ev.EMPM_STTS_YN		empmSttsYn		,
+		ev.EMPM_WRC_NM		empmWrcNm		,
+		ev.HGVLC_YN		hgvlcYn		,
+		ev.BUS_DRVNG_CRTFCT_YN		busDrvngCrtfctYn		,
+		ev.HOPE_TRPTT_BZENTY		hopeTrpttBzenty		,
+		ev.RSNAPLC		rsnaplc		,
+		ev.SGNT_FILE_SN		sgntFileSn		,
+		FN_CRYPTO_DEC(ev.SGNTR_FLNM,'${scrKey}')		sgntrFlnm ,
+		
+		evpm.EMPCNN_VOCTRN_PCRN_MNG_SN		empcnnVoctrnPcrnMngSn		,
+		evpm.EDU_BGNG_YMD		eduBgngYmd		,
+		evpm.EDU_END_YMD		eduEndYmd		,
+		evpm.EDU_FNSH_CMPTN_YN		eduFnshCmptnYn		,
+		evpm.MDW_GVUP_YN		mdwGvupYn		,
+		evpm.CRTFCT_ACQS_YN		crtfctAcqsYn		,
+		evpm.CRTFCT_INFO		crtfctInfo		,
+		evpm.EMPM_YN		empmYn		,
+		evpm.EMPM_CO_NM		empmCoNm		,
+		evpm.RMRK		rmrk		
+	</sql>
+	<sql id="KoreahanaEmpPrcTable">
+	    TB_SPRT s 
+	    LEFT JOIN TB_EMPCNN_VOCTRN ev ON (s.SPRT_SN = ev.SPRT_SN)
+	    INNER JOIN TB_PBANCRC p ON (p.PBANCRC_SN = s.PBANCRC_SN AND p.DEL_YN = 'N')
+	    LEFT JOIN TB_MBR_ADTIFM ma ON (s.RGTR_ID = ma.MBR_ID)
+	    LEFT JOIN TB_EMPCNN_VOCTRN_PRCN_MNG evpm ON (s.SPRT_SN = evpm.SPRT_SN AND evpm.DEL_YN = 'N')
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.emp.vo.KoreahanaEmpPrcVO" resultType="exts.koreahana.emp.vo.KoreahanaEmpPrcVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaEmpPrcColumn"/>
+				FROM
+					<include refid="KoreahanaEmpPrcTable"/>
+				<include refid="KoreahanaEmpPrcWhere"/>
+				ORDER BY
+					EMPCNN_VOCTRN_PCRN_MNG_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.emp.vo.KoreahanaEmpPrcVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaEmpPrcTable"/>
+		<include refid="KoreahanaEmpPrcWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.emp.vo.KoreahanaEmpPrcVO" resultType="exts.koreahana.emp.vo.KoreahanaEmpPrcVO">
+		SELECT
+			<include refid="KoreahanaEmpPrcColumn"/>
+		FROM
+			<include refid="KoreahanaEmpPrcTable"/>
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_STTS_CD = #{sprtSttsCd}
+			AND s.SPRT_SN = #{sprtSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.emp.vo.KoreahanaEmpPrcVO">
+		<selectKey resultType="string" keyProperty="empcnnVoctrnPcrnMngSn" order="BEFORE">
+			SELECT SEQ_TB_EMPCNN_VOCTRN_PRCN_MNG.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_EMPCNN_VOCTRN_PRCN_MNG (
+			EMPCNN_VOCTRN_PCRN_MNG_SN		,
+			SPRT_SN		,
+			EDU_BGNG_YMD		,
+			EDU_END_YMD		,
+			EDU_FNSH_CMPTN_YN		,
+			MDW_GVUP_YN		,
+			CRTFCT_ACQS_YN		,
+			CRTFCT_INFO		,
+			EMPM_YN		,
+			EMPM_CO_NM		,
+			RMRK		,
+
+			RGTR_ID     ,
+			MDFR_ID       ,
+			REG_DT        ,
+			MDFCN_DT        ,
+			DEL_YN
+		) VALUES (
+			#{empcnnVoctrnPcrnMngSn}		,
+			#{sprtSn}		,
+			REPLACE(REPLACE(#{eduBgngYmd},'-',''),'.','')		,
+			REPLACE(REPLACE(#{eduEndYmd},'-',''),'.','')		,
+			NVL(#{eduFnshCmptnYn},'N')		,
+			NVL(#{mdwGvupYn},'N')		,
+			NVL(#{crtfctAcqsYn},'N')		,
+			#{crtfctInfo}		,
+			NVL(#{empmYn},'N')		,
+			#{empmCoNm}		,
+			#{rmrk}		,
+
+			#{rgtrId}   ,
+			#{mdfrId}     ,
+			SYSDATE     ,
+			SYSDATE     ,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.emp.vo.KoreahanaEmpPrcVO">
+		UPDATE 
+			TB_EMPCNN_VOCTRN_PRCN_MNG
+		SET
+			SPRT_SN	=	#{sprtSn}		,
+			EDU_BGNG_YMD	=	REPLACE(REPLACE(#{eduBgngYmd},'-',''),'.','')		,
+			EDU_END_YMD	=	REPLACE(REPLACE(#{eduEndYmd},'-',''),'.','')		,
+			EDU_FNSH_CMPTN_YN	=	NVL(#{eduFnshCmptnYn},'N')		,
+			MDW_GVUP_YN	=	NVL(#{mdwGvupYn},'N')		,
+			CRTFCT_ACQS_YN	=	NVL(#{crtfctAcqsYn},'N')		,
+			CRTFCT_INFO	=	#{crtfctInfo}		,
+			EMPM_YN	=	NVL(#{empmYn},'N')		,
+			EMPM_CO_NM	=	#{empmCoNm}		,
+			RMRK	=	#{rmrk}		,
+
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND SPRT_SN = #{sprtSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.emp.vo.KoreahanaEmpPrcVO">
+		UPDATE
+			TB_EMPCNN_VOCTRN_PRCN_MNG
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND EMPCNN_VOCTRN_PCRN_MNG_SN = #{empcnnVoctrnPcrnMngSn}
+	</update>	
+	
+	<select id="selectStatistic" parameterType="exts.koreahana.emp.vo.KoreahanaEmpPrcVO" resultType="egovMap">
+		SELECT 
+			NVL(a.TCNT,0) TCNT,
+			NVL(a.EDU_FNSH_CNT,0) EDU_FNSH_CNT,
+			a.BIZ_SE_CD BIZ_SE_CD,
+			NVL(a.PCNT ,0) FNSH_PCNT,
+			NVL(b.CRTFCT_ACQS_CNT,0) CRTFCT_ACQS_CNT,
+			NVL(b.PCNT ,0) CRT_PCNT,
+			NVL(c.EMPM_CNT,0) EMPM_CNT,
+			NVL(c.PCNT ,0) EMP_PCNT	
+		FROM 
+		(
+			SELECT
+				'FNSH' TP,
+				COUNT(*) AS TCNT,
+				SUM(DECODE(evpm.EDU_FNSH_CMPTN_YN,'Y',1,0)) AS EDU_FNSH_CNT,
+				p.BIZ_SE_CD,
+				ROUND(SUM(DECODE(evpm.EDU_FNSH_CMPTN_YN,'Y',1,0))/COUNT(*)*100, 1) PCNT
+			FROM
+				TB_SPRT s 
+				LEFT JOIN TB_EMPCNN_VOCTRN ev ON (s.SPRT_SN = ev.SPRT_SN)
+				INNER JOIN TB_PBANCRC p ON (p.PBANCRC_SN = s.PBANCRC_SN AND p.DEL_YN = 'N')
+				LEFT JOIN TB_EMPCNN_VOCTRN_PRCN_MNG evpm ON (s.SPRT_SN = evpm.SPRT_SN AND evpm.DEL_YN = 'N')
+			WHERE
+				s.DEL_YN = 'N'
+				AND p.PBANCRC_CTGRY_FRST_CD = #{pbancrcCtgryFrstCd}
+				AND s.SPRT_STTS_CD = #{sprtSttsCd}
+			<if test='sprtYr != null and !sprtYr.equals("")'>
+				AND TO_CHAR(s.REG_DT,'YYYY') = #{sprtYr}
+			</if>
+			GROUP BY 
+				ROLLUP(p.BIZ_SE_CD)
+			
+		) a
+		LEFT JOIN
+		(
+			SELECT
+				'CRTFCT' TP,
+				p.BIZ_SE_CD,
+				SUM(DECODE(evpm.CRTFCT_ACQS_YN,'Y',1,0)) AS CRTFCT_ACQS_CNT,
+				ROUND(SUM(DECODE(evpm.CRTFCT_ACQS_YN,'Y',1,0))/COUNT(*)*100, 1) PCNT
+			FROM
+				TB_SPRT s 
+				LEFT JOIN TB_EMPCNN_VOCTRN ev ON (s.SPRT_SN = ev.SPRT_SN)
+				INNER JOIN TB_PBANCRC p ON (p.PBANCRC_SN = s.PBANCRC_SN AND p.DEL_YN = 'N')
+				LEFT JOIN TB_EMPCNN_VOCTRN_PRCN_MNG evpm ON (s.SPRT_SN = evpm.SPRT_SN AND evpm.DEL_YN = 'N')
+			WHERE
+				s.DEL_YN = 'N'
+				AND p.PBANCRC_CTGRY_FRST_CD = #{pbancrcCtgryFrstCd}
+				AND s.SPRT_STTS_CD = #{sprtSttsCd}
+			<if test='sprtYr != null and !sprtYr.equals("")'>
+				AND TO_CHAR(s.REG_DT,'YYYY') = #{sprtYr}
+			</if>
+				AND evpm.EDU_FNSH_CMPTN_YN = 'Y'
+			GROUP BY 
+				ROLLUP(p.BIZ_SE_CD)	
+		) b ON ( NVL(a.BIZ_SE_CD,'T') = NVL(b.BIZ_SE_CD,'T'))
+		LEFT JOIN 
+		(	
+			SELECT
+				'EMPM' TP,
+				p.BIZ_SE_CD,
+				SUM(DECODE(evpm.EMPM_YN,'Y',1,0)) AS EMPM_CNT,
+				ROUND(SUM(DECODE(evpm.EMPM_YN,'Y',1,0))/COUNT(*)*100, 1) PCNT
+			FROM
+				TB_SPRT s 
+				LEFT JOIN TB_EMPCNN_VOCTRN ev ON (s.SPRT_SN = ev.SPRT_SN)
+				INNER JOIN TB_PBANCRC p ON (p.PBANCRC_SN = s.PBANCRC_SN AND p.DEL_YN = 'N')
+				LEFT JOIN TB_EMPCNN_VOCTRN_PRCN_MNG evpm ON (s.SPRT_SN = evpm.SPRT_SN AND evpm.DEL_YN = 'N')
+			WHERE
+				s.DEL_YN = 'N'
+				AND p.PBANCRC_CTGRY_FRST_CD = #{pbancrcCtgryFrstCd}
+				AND s.SPRT_STTS_CD = #{sprtSttsCd}
+			<if test='sprtYr != null and !sprtYr.equals("")'>
+				AND TO_CHAR(s.REG_DT,'YYYY') = #{sprtYr}
+			</if>
+				AND evpm.EDU_FNSH_CMPTN_YN = 'Y'
+			GROUP BY 
+				ROLLUP(p.BIZ_SE_CD)
+		) c ON ( NVL(a.BIZ_SE_CD,'T') = NVL(c.BIZ_SE_CD,'T'))
+
+	</select>
+</mapper>

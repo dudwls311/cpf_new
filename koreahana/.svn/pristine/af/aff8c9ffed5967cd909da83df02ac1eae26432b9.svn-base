@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.spf.KoreahanaSpf">
+		
+	<sql id="KoreahanaSpfWhere">
+		<include refid="exts.mapper.koreahana.spr.KoreahanaSpr.KoreahanaSprComWhere"/>
+	</sql>
+	<sql id="KoreahanaSpfColumn">
+		s.SPRT_SN	sprtSn		,
+		FN_CRYPTO_DEC(s.FLNM,'${scrKey}')		flnm		,
+		s.GENDER_CD	genderCd	,
+		FN_CRYPTO_DEC(s.BRDT_YMD,'${scrKey}')	brdtYmd		,
+		FN_CRYPTO_DEC(s.MBPHNO,'${scrKey}')		mbphno		,
+		FN_CRYPTO_DEC(s.ZIP,'${scrKey}')		zip		,
+		FN_CRYPTO_DEC(s.ADDR,'${scrKey}')		addr		,
+		FN_CRYPTO_DEC(s.DADDR,'${scrKey}')		daddr		,
+		s.SPRT_STTS_CD		sprtSttsCd		,
+		s.RSN		rsn		,
+		s.RGTR_ID             rgtrId  ,
+		s.MDFR_ID            mdfrId ,
+		s.REG_DT                regDt    ,
+		s.MDFCN_DT               mdfcnDt   ,
+		s.DEL_YN                  delYn   ,
+		
+        p.PBANCRC_SN		pbancrcSn		,
+		p.PBANCRC_CTGRY_FRST_CD		pbancrcCtgryFrstCd		,
+		p.BIZ_SE_CD       bizSeCd    ,
+		p.RLS_YN          rlsYn      ,
+		p.PBANCRC_NM		pbancrcNm		,
+		p.PBANCRC_CN		pbancrcCn		,
+		p.INQ_CNT		inqCnt		,
+		p.PBANCRC_BGNG_DT		pbancrcBgngDt ,
+		p.PBANCRC_END_DT		pbancrcEndDt ,
+		FN_GET_PBANCRC_STTS(p.PBANCRC_BGNG_DT, p.PBANCRC_END_DT) pbancrcSttsCd	,
+		
+		<!-- FN_CRYPTO_DEC(ma.NTKRDF_UNQ_NO,'${scrKey}')		ntkrdfUnqNo ,
+		ma.HANAWON_TH		hanawonTh		,
+		ma.ENTCNY_YMD			entcnyYmd	,
+		ma.PRTDCS_YMD			prtdcsYmd	,
+		ma.HANAWON_FNSH_YMD	hanawonFnshYmd	, -->
+		
+		sp.PHOTO_FILE_SN		photoFileSn		,
+		sp.ORDP_NM		ordpNm		,
+		FN_CRYPTO_DEC(sp.CRTFCT_RCV_ZIP,'${scrKey}')		crtfctRcvZip	 ,
+		FN_CRYPTO_DEC(sp.CRTFCT_RCV_ADDR,'${scrKey}')		crtfctRcvAddr	,
+		FN_CRYPTO_DEC(sp.CRTFCT_RCV_DADDR,'${scrKey}')	crtfctRcvDaddr	,
+		FN_CRYPTO_DEC(sp.EML,'${scrKey}')		eml		,
+		sp.LAST_ACBG_CD		lastAcbgCd		,
+		sp.LAST_ACBG_ETC		lastAcbgEtc		,
+		sp.OCPT_INST_TYPE_CD		ocptInstTypeCd		,
+		sp.OCPT_INST_TYPE_ETC		ocptInstTypeEtc		,
+		sp.PTEXP		ptexp		,
+		sp.APLY_MTV		aplyMtv		,
+		sp.EDU_FNSH_YMD		eduFnshYmd		,
+		sp.SGNT_FILE_SN		sgntFileSn		,
+		FN_CRYPTO_DEC(sp.SGNTR_FLNM,'${scrKey}')		sgntrFlnm
+	</sql>
+	<sql id="KoreahanaSpfTable">
+	    TB_SPRT s 
+	    LEFT JOIN TB_SPFST sp ON (s.SPRT_SN = sp.SPRT_SN)
+	    INNER JOIN TB_PBANCRC p ON (p.PBANCRC_SN = s.PBANCRC_SN AND p.DEL_YN = 'N')
+	    <!-- LEFT JOIN TB_MBR_ADTIFM ma ON (s.RGTR_ID = ma.MBR_ID) -->
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.spf.vo.KoreahanaSpfVO" resultType="exts.koreahana.spf.vo.KoreahanaSpfVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaSpfColumn"/>
+				FROM
+					<include refid="KoreahanaSpfTable"/>
+				<include refid="KoreahanaSpfWhere"/>
+				ORDER BY
+					s.SPRT_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.spf.vo.KoreahanaSpfVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaSpfTable"/>
+		<include refid="KoreahanaSpfWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.spf.vo.KoreahanaSpfVO" resultType="exts.koreahana.spf.vo.KoreahanaSpfVO">
+		SELECT
+			<include refid="KoreahanaSpfColumn"/>
+		FROM
+			<include refid="KoreahanaSpfTable"/>
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_SN = #{sprtSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.spf.vo.KoreahanaSpfVO">
+		INSERT INTO TB_SPFST (
+			SPRT_SN		,
+			PHOTO_FILE_SN		,
+			ORDP_NM		,
+			CRTFCT_RCV_ZIP	 	,
+			CRTFCT_RCV_ADDR		,
+			CRTFCT_RCV_DADDR		,
+			EML		,
+			LAST_ACBG_CD		,
+			LAST_ACBG_ETC		,
+			OCPT_INST_TYPE_CD		,
+			OCPT_INST_TYPE_ETC		,
+			PTEXP		,
+			APLY_MTV		,
+			EDU_FNSH_YMD		,
+			SGNT_FILE_SN		,
+			SGNTR_FLNM
+		) VALUES (
+			#{sprtSn}		,
+			#{photoFileSn}		,
+			#{ordpNm}		,
+			FN_CRYPTO_ENC(#{crtfctRcvZip},'${scrKey}')	 ,
+			FN_CRYPTO_ENC(#{crtfctRcvAddr},'${scrKey}')	,
+			FN_CRYPTO_ENC(#{crtfctRcvDaddr},'${scrKey}')	,
+			FN_CRYPTO_ENC(#{eml},'${scrKey}')		,
+			#{lastAcbgCd}		,
+			#{lastAcbgEtc}		,
+			#{ocptInstTypeCd}		,
+			#{ocptInstTypeEtc}		,
+			#{ptexp}		,
+			#{aplyMtv}		,
+			REPLACE(#{eduFnshYmd}, '-', '')		,
+			#{sgntFileSn}		,
+			FN_CRYPTO_ENC(#{sgntrFlnm},'${scrKey}')
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.spf.vo.KoreahanaSpfVO">
+		UPDATE 
+			TB_SPFST
+		SET
+			PHOTO_FILE_SN	=	#{photoFileSn}		,
+			ORDP_NM	=	#{ordpNm}		,
+			CRTFCT_RCV_ZIP	=	FN_CRYPTO_ENC(#{crtfctRcvZip},'${scrKey}')	 ,
+			CRTFCT_RCV_ADDR	=	FN_CRYPTO_ENC(#{crtfctRcvAddr},'${scrKey}')	,
+			CRTFCT_RCV_DADDR	=	FN_CRYPTO_ENC(#{crtfctRcvDaddr},'${scrKey}')	,
+			EML	=	FN_CRYPTO_ENC(#{eml},'${scrKey}')		,
+			LAST_ACBG_CD	=	#{lastAcbgCd}		,
+			LAST_ACBG_ETC	=	#{lastAcbgEtc}		,
+			OCPT_INST_TYPE_CD	=	#{ocptInstTypeCd}		,
+			OCPT_INST_TYPE_ETC	=	#{ocptInstTypeEtc}		,
+			PTEXP	=	#{ptexp}		,
+			APLY_MTV	=	#{aplyMtv}		,
+			EDU_FNSH_YMD	=	REPLACE(#{eduFnshYmd}, '-', '')		,
+			SGNT_FILE_SN	=	#{sgntFileSn}		,
+			SGNTR_FLNM	=	FN_CRYPTO_ENC(#{sgntrFlnm},'${scrKey}')
+		WHERE
+			SPRT_SN = #{sprtSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.spf.vo.KoreahanaSpfVO">
+		DELETE FROM
+			TB_SPFST
+		WHERE
+			SPRT_SN = #{sprtSn}
+	</update>
+	
+	<select id="selectListExcel" parameterType="exts.koreahana.spf.vo.KoreahanaSpfVO" resultType="exts.koreahana.spf.vo.KoreahanaSpfExcelVO">
+		SELECT
+			<include refid="KoreahanaSpfColumn"/> ,
+			<include refid="exts.mapper.com.ComMbr.mbrAdtColumn"/> ,
+			spm.EXSLNO exslno
+		FROM
+			<include refid="KoreahanaSpfTable"/>
+			<include refid="exts.mapper.com.ComMbr.mbrAdtTable"/>
+			LEFT JOIN TB_SPFST_PRCN_MNG spm ON (s.SPRT_SN = spm.SPRT_SN AND spm.DEL_YN = 'N')
+		<include refid="KoreahanaSpfWhere"/>
+		ORDER BY
+			s.SPRT_SN DESC
+	</select>
+	
+	<select id="selectPrint" parameterType="exts.koreahana.spf.vo.KoreahanaSpfVO" resultType="exts.koreahana.spf.vo.KoreahanaSpfVO">
+		SELECT
+			sp.PHOTO_FILE_SN		photoFileSn		,
+			sp.ORDP_NM		ordpNm		,
+			FN_CRYPTO_DEC(sp.CRTFCT_RCV_ZIP,'${scrKey}')		crtfctRcvZip	 ,
+			FN_CRYPTO_DEC(sp.CRTFCT_RCV_ADDR,'${scrKey}')		crtfctRcvAddr	,
+			FN_CRYPTO_DEC(sp.CRTFCT_RCV_DADDR,'${scrKey}')	crtfctRcvDaddr	,
+			FN_CRYPTO_DEC(sp.EML,'${scrKey}')		eml		,
+			sp.LAST_ACBG_CD		lastAcbgCd		,
+			sp.LAST_ACBG_ETC		lastAcbgEtc		,
+			sp.OCPT_INST_TYPE_CD		ocptInstTypeCd		,
+			sp.OCPT_INST_TYPE_ETC		ocptInstTypeEtc		,
+			sp.PTEXP		ptexp		,
+			sp.APLY_MTV		aplyMtv		,
+			sp.EDU_FNSH_YMD		eduFnshYmd		,
+			
+			spm.SPFST_PRCN_MNG_SN		spfstPrcnMngSn		,
+			spm.SPRT_SN		sprtSn		,
+			spm.SPFST_QLFC_TEST_INFO_SN		spfstQlfcTestInfoSn		,
+			spm.EXSLNO		exslno		,
+			spm.TEST_RSLT_CD		testRsltCd		,
+			spm.PASS_YMD		passYmd
+		FROM
+			TB_SPRT s
+	    	LEFT JOIN TB_SPFST sp ON (s.SPRT_SN = sp.SPRT_SN)
+	    	LEFT JOIN TB_SPFST_PRCN_MNG spm ON (s.SPRT_SN = spm.SPRT_SN AND spm.DEL_YN = 'N')
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_SN = #{sprtSn}
+	</select>
+</mapper>

@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.pba.KoreahanaPba">
+		
+	<sql id="KoreahanaPbaWhere">
+		WHERE
+			DEL_YN = 'N'
+		<if test='pbancrcSttsCd != null and !pbancrcSttsCd.equals("")'>
+			AND FN_GET_PBANCRC_STTS(PBANCRC_BGNG_DT, PBANCRC_END_DT) = #{pbancrcSttsCd}
+		</if>
+		<if test='pbancrcCtgryFrstCd != null and !pbancrcCtgryFrstCd.equals("")'>
+			AND PBANCRC_CTGRY_FRST_CD = #{pbancrcCtgryFrstCd}
+		</if>
+		<if test='bizSeCd != null and !bizSeCd.equals("")'>
+			AND BIZ_SE_CD = #{bizSeCd}
+		</if>
+		<if test='pbancrcSttsCd != null and !pbancrcSttsCd.equals("")'>
+			AND FN_GET_PBANCRC_STTS(PBANCRC_BGNG_DT, PBANCRC_END_DT) = #{pbancrcSttsCd}
+		</if>
+		<if test='rlsYn != null and !rlsYn.equals("")'>
+			AND RLS_YN = #{rlsYn}
+		</if>
+		<if test='pbancrcSttsCdList != null'>
+			<foreach open="AND FN_GET_PBANCRC_STTS(PBANCRC_BGNG_DT, PBANCRC_END_DT) IN (" close=")" item="item" index="index" collection="pbancrcSttsCdList" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<!--
+		<if test='pbancrcCtgryFrstCd != null and !pbancrcCtgryFrstCd.equals("")'>
+			AND PBANCRC_CTGRY_FRST_CD = #{pbancrcCtgryFrstCd}
+		</if>
+		<if test='pbancrcNm != null and !pbancrcNm.equals("")'>
+			AND PBANCRC_NM = #{pbancrcNm}
+		</if>
+		<if test='pbancrcCn != null and !pbancrcCn.equals("")'>
+			AND PBANCRC_CN = #{pbancrcCn}
+		</if>
+		<if test='inqCnt != null and !inqCnt.equals("")'>
+			AND INQ_CNT = #{inqCnt}
+		</if>
+		<if test='pbancrcBgngDt != null and !pbancrcBgngDt.equals("")'>
+			AND PBANCRC_BGNG_DT = #{pbancrcBgngDt}
+		</if>
+		<if test='pbancrcEndDt != null and !pbancrcEndDt.equals("")'>
+			AND PBANCRC_END_DT = #{pbancrcEndDt}
+		</if>
+
+		-->
+		
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>	<!-- 전체 -->
+					AND (
+						PBANCRC_NM LIKE '%'||#{searchKeyword}||'%'
+						OR PBANCRC_CN LIKE '%'||#{searchKeyword}||'%'
+					)
+				</when>
+				<when test='"1".equals(searchCondition)'>	<!-- 제목 -->
+					AND PBANCRC_NM LIKE '%'||#{searchKeyword}||'%'
+				</when>
+				<when test='"2".equals(searchCondition)'>	<!-- 내용 -->
+					AND PBANCRC_CN LIKE '%'||#{searchKeyword}||'%'
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaPbaColumn">
+		PBANCRC_SN		pbancrcSn		,
+		PBANCRC_CTGRY_FRST_CD		pbancrcCtgryFrstCd		,
+		BIZ_SE_CD       bizSeCd    ,
+		RLS_YN          rlsYn      ,
+		PBANCRC_NM		pbancrcNm		,
+		PBANCRC_CN		pbancrcCn		,
+		INQ_CNT		inqCnt		,
+		TOP_SEARCH_YN	topSearchYn	,
+		PBANCRC_BGNG_DT		pbancrcBgngDt ,
+		PBANCRC_END_DT		pbancrcEndDt ,
+		FN_GET_PBANCRC_STTS(PBANCRC_BGNG_DT, PBANCRC_END_DT) pbancrcSttsCd,
+		RGTR_ID             rgtrId  ,
+		MDFR_ID            mdfrId ,
+		REG_DT                regDt    ,
+		MDFCN_DT               mdfcnDt   ,
+		DEL_YN                  delYn 
+	</sql>
+	<sql id="KoreahanaPbaTable">
+	    TB_PBANCRC
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.pba.vo.KoreahanaPbaVO" resultType="exts.koreahana.pba.vo.KoreahanaPbaVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaPbaColumn"/>
+				FROM
+					<include refid="KoreahanaPbaTable"/>
+				<include refid="KoreahanaPbaWhere"/>
+				ORDER BY
+					TOP_SEARCH_YN DESC, PBANCRC_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE
+			1 = 1
+			AND RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.pba.vo.KoreahanaPbaVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaPbaTable"/>
+		<include refid="KoreahanaPbaWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.pba.vo.KoreahanaPbaVO" resultType="exts.koreahana.pba.vo.KoreahanaPbaVO">
+		SELECT
+			<include refid="KoreahanaPbaColumn"/>
+		FROM
+			<include refid="KoreahanaPbaTable"/>
+		WHERE
+			PBANCRC_SN = #{pbancrcSn}
+			<if test='rlsYn != null and !rlsYn.equals("")'>
+				AND RLS_YN = #{rlsYn}
+			</if>
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.pba.vo.KoreahanaPbaVO">
+		<selectKey resultType="string" keyProperty="pbancrcSn" order="BEFORE">
+			SELECT SEQ_TB_PBANCRC.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_PBANCRC (
+			PBANCRC_SN		,
+			PBANCRC_CTGRY_FRST_CD		,
+			BIZ_SE_CD    ,
+			RLS_YN      ,
+			PBANCRC_NM		,
+			PBANCRC_CN		,
+			INQ_CNT		,
+			TOP_SEARCH_YN	,
+			PBANCRC_BGNG_DT		,
+			PBANCRC_END_DT		,
+
+			RGTR_ID     ,
+			MDFR_ID       ,
+			REG_DT        ,
+			MDFCN_DT        ,
+			DEL_YN
+		) VALUES (
+			#{pbancrcSn}		,
+			#{pbancrcCtgryFrstCd}		,
+			#{bizSeCd}    ,
+			#{rlsYn}      ,
+			#{pbancrcNm}		,
+			#{pbancrcCn}		,
+			#{inqCnt}		,
+			#{topSearchYn}		,
+			#{pbancrcBgngDt}	,
+			#{pbancrcEndDt}		,
+
+			#{rgtrId}   ,
+			#{mdfrId}     ,
+			SYSDATE     ,
+			SYSDATE     ,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.pba.vo.KoreahanaPbaVO">
+		UPDATE 
+			TB_PBANCRC
+		SET
+			<!--
+			PBANCRC_CTGRY_FRST_CD	=	#{pbancrcCtgryFrstCd}		,
+			BIZ_SE_CD = #{bizSeCd}    ,
+			-->
+			RLS_YN = #{rlsYn}      ,
+			PBANCRC_NM	=	#{pbancrcNm}		,
+			PBANCRC_CN	=	#{pbancrcCn}		,
+			TOP_SEARCH_YN =		#{topSearchYn}	,
+			PBANCRC_BGNG_DT	=	#{pbancrcBgngDt}		,
+			PBANCRC_END_DT	=	#{pbancrcEndDt}		,
+
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			PBANCRC_SN = #{pbancrcSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.pba.vo.KoreahanaPbaVO">
+		UPDATE
+			TB_PBANCRC
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			PBANCRC_SN = #{pbancrcSn}
+	</update>
+	
+	<update id="updateInqCntPlus" parameterType="exts.koreahana.pba.vo.KoreahanaPbaVO">
+		UPDATE
+			TB_PBANCRC
+		SET
+			INQ_CNT = (INQ_CNT + 1)
+		WHERE
+			PBANCRC_SN = #{pbancrcSn}
+	</update>
+</mapper>

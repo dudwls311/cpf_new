@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.spb.KoreahanaSpb">
+		
+	<sql id="KoreahanaSpbWhere">
+		WHERE
+			DEL_YN = 'N'
+		<if test='stngCd != null and !stngCd.equals("")'>
+			AND STNG_CD = #{stngCd}
+		</if>
+		<if test='ctgryFrstCd != null and !ctgryFrstCd.equals("")'>
+			AND CTGRY_FRST_CD = #{ctgryFrstCd}
+		</if>
+
+		
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>	<!-- 전체 -->
+					AND CTGRY_FRST_CD LIKE '%'||#{searchKeyword}||'%'
+				</when>
+				<when test='"1".equals(searchCondition)'>	<!-- 제목 -->
+					AND CTGRY_FRST_CD LIKE '%'||#{searchKeyword}||'%'
+				</when>
+				<when test='"2".equals(searchCondition)'>	<!-- 내용 -->
+					
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaSpbColumn">
+		SPRT_BIZ_STNG_SN		sprtBizStngSn		,
+		CTGRY_FRST_CD		ctgryFrstCd		,
+		STNG_CD		stngCd		,
+
+		RGTR_ID             rgtrId  ,
+		MDFR_ID            mdfrId ,
+		REG_DT                regDt    ,
+		MDFCN_DT               mdfcnDt   
+	</sql>
+	<sql id="KoreahanaSpbTable">
+	    TB_SPRT_BIZ_STNG
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.spb.vo.KoreahanaSpbVO" resultType="exts.koreahana.spb.vo.KoreahanaSpbVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaSpbColumn"/>
+				FROM
+					<include refid="KoreahanaSpbTable"/>
+				<include refid="KoreahanaSpbWhere"/>
+				ORDER BY
+					SPRT_BIZ_STNG_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.spb.vo.KoreahanaSpbVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaSpbTable"/>
+		<include refid="KoreahanaSpbWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.spb.vo.KoreahanaSpbVO" resultType="exts.koreahana.spb.vo.KoreahanaSpbVO">
+		SELECT
+			<include refid="KoreahanaSpbColumn"/>
+		FROM
+			<include refid="KoreahanaSpbTable"/>
+		WHERE
+			DEL_YN = 'N'
+			AND SPRT_BIZ_STNG_SN = #{sprtBizStngSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.spb.vo.KoreahanaSpbVO">
+		<selectKey resultType="string" keyProperty="sprtBizStngSn" order="BEFORE">
+			SELECT SEQ_TB_SPRT_BIZ_STNG.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_SPRT_BIZ_STNG (
+			SPRT_BIZ_STNG_SN		,
+			CTGRY_FRST_CD		,
+			STNG_CD		,
+
+			RGTR_ID     ,
+			MDFR_ID       ,
+			REG_DT        ,
+			MDFCN_DT        ,
+			DEL_YN
+		) VALUES (
+			#{sprtBizStngSn}		,
+			#{ctgryFrstCd}		,
+			#{stngCd}		,
+
+			#{rgtrId}   ,
+			#{mdfrId}     ,
+			SYSDATE     ,
+			SYSDATE     ,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.spb.vo.KoreahanaSpbVO">
+		UPDATE 
+			TB_SPRT_BIZ_STNG
+		SET
+			CTGRY_FRST_CD	=	#{ctgryFrstCd}		,
+			STNG_CD	=	#{stngCd}		,
+
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND SPRT_BIZ_STNG_SN = #{sprtBizStngSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.spb.vo.KoreahanaSpbVO">
+		UPDATE
+			TB_SPRT_BIZ_STNG
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND CTGRY_FRST_CD = #{ctgryFrstCd}
+	</update>
+	
+	
+	<select id="selectSearch" parameterType="egovMap" resultType="String">
+		SELECT
+			DISTINCT(CTGRY_FRST_CD) CTGRY_FRST_CD
+		FROM
+			TB_SPRT_BIZ_STNG
+		WHERE
+			DEL_YN =  'N'
+			AND CTGRY_FRST_CD IN <foreach open="(" close=")" item="item" index="index" collection="ctgryFrstCds" separator=",">#{item}</foreach>
+			AND STNG_CD IN <foreach open="(" close=")" item="item" index="index" collection="stngCds" separator=",">#{item}</foreach>
+	</select>	
+</mapper>

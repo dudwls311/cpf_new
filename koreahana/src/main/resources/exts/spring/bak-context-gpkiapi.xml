@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+	
+	  
+	<bean id="gpkiUtil" class="exts.gpkiapi.util.GpkiUtil" init-method="init">
+      <property name="gpkiLicPath" value="/home/tomcat/gpkiapiJava_v1.5.2.0_Linux_2.6.32-358.6.1.el6.x86_64_x86_64_64bit_20220801/" />
+      <property name="certFilePath" value="/home/tomcat/gpkiapiJava_v1.5.2.0_Linux_2.6.32-358.6.1.el6.x86_64_x86_64_64bit_20220801/cert/" />
+      <property name="envCertFilePathName" value="/home/tomcat/gpkiapiJava_v1.5.2.0_Linux_2.6.32-358.6.1.el6.x86_64_x86_64_64bit_20220801/cert/SVRB552842002_env.cer" />
+      <property name="envPrivateKeyFilePathName" value="/home/tomcat/gpkiapiJava_v1.5.2.0_Linux_2.6.32-358.6.1.el6.x86_64_x86_64_64bit_20220801/cert/SVRB552842002_env.key" />
+      <property name="envPrivateKeyPasswd" value="qhdks2197@" />
+      <property name="isLDAP" value="true" />
+      <property name="myServerId" value="SVRB552842002" />
+      <property name="sigCertFilePathName" value="/home/tomcat/gpkiapiJava_v1.5.2.0_Linux_2.6.32-358.6.1.el6.x86_64_x86_64_64bit_20220801/cert/SVRB552842002_sig.cer" />
+      <property name="sigPrivateKeyFilePathName" value="/home/tomcat/gpkiapiJava_v1.5.2.0_Linux_2.6.32-358.6.1.el6.x86_64_x86_64_64bit_20220801/cert/SVRB552842002_sig.key" />
+      <property name="sigPrivateKeyPasswd" value="qhdks2197@" />
+      <property name="targetServerId" value="CG125000001048" />
+   </bean>
+	
+</beans>	

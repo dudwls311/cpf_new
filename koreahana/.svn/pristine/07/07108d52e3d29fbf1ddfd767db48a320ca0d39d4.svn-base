@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.sms.KoreahanaSmsLog">
+		
+	<sql id="KoreahanaSmsLogWhere">
+		WHERE
+			1 = 1
+	</sql>
+	<sql id="KoreahanaSmsLogColumn">
+		CLIDX		clidx		,
+		STAT		stat		,
+		REG_DT		regDt		,
+		RGTR_ID		rgtrId 
+	</sql>
+	<sql id="KoreahanaSmsLogTable">
+	    TB_SMS_LOG
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.sms.vo.KoreahanaSmsLogVO" resultType="exts.koreahana.sms.vo.KoreahanaSmsLogVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaSmsLogColumn"/>
+				FROM
+					<include refid="KoreahanaSmsLogTable"/>
+				<include refid="KoreahanaSmsLogWhere"/>
+				ORDER BY
+					CLIDX DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.sms.vo.KoreahanaSmsLogVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaSmsLogTable"/>
+		<include refid="KoreahanaSmsLogWhere"/>
+	</select>
+	
+	<select id="select" parameterType="exts.koreahana.sms.vo.KoreahanaSmsLogVO" resultType="exts.koreahana.sms.vo.KoreahanaSmsLogVO">
+		SELECT
+			<include refid="KoreahanaSmsLogColumn"/>
+		FROM
+			<include refid="KoreahanaSmsLogTable"/>
+		WHERE
+			CLIDX = #{clidx}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.sms.vo.KoreahanaSmsLogVO">
+		INSERT INTO TB_SMS_LOG (
+			CLIDX		,
+			STAT		,
+			REG_DT		,
+			RGTR_ID
+		) VALUES (
+			#{clidx}		,
+			#{stat}		,
+			SYSDATE		,
+			#{rgtrId}
+		)
+	</insert>
+</mapper>

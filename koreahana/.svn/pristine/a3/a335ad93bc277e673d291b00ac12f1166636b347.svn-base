@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.emv.KoreahanaEmvPrcTkc">
+		
+	<sql id="KoreahanaEmvPrcTkcWhere">
+		WHERE
+			1 = 1
+		<if test='sprtSn != null and !sprtSn.equals("")'>
+			AND SPRT_SN = #{sprtSn}
+		</if>
+		<!--
+		<if test='sbjctCd != null and !sbjctCd.equals("")'>
+			AND SBJCT_CD = #{sbjctCd}
+		</if>
+		<if test='sbjctNm != null and !sbjctNm.equals("")'>
+			AND SBJCT_NM = #{sbjctNm}
+		</if>
+		<if test='ednstCd != null and !ednstCd.equals("")'>
+			AND EDNST_CD = #{ednstCd}
+		</if>
+		<if test='ednstNm != null and !ednstNm.equals("")'>
+			AND EDNST_NM = #{ednstNm}
+		</if>
+		<if test='tkclsPeriod != null and !tkclsPeriod.equals("")'>
+			AND TKCLS_PERIOD = #{tkclsPeriod}
+		</if>
+		-->
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>	<!-- 전체 -->
+					AND SPRT_SN LIKE '%'||#{searchKeyword}||'%'
+				</when>
+				<when test='"1".equals(searchCondition)'>	<!-- 제목 -->
+					AND SPRT_SN LIKE '%'||#{searchKeyword}||'%'
+				</when>
+				<when test='"2".equals(searchCondition)'>	<!-- 내용 -->
+					
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaEmvPrcTkcColumn">
+		EMVUCD_SPRT_PRCN_MNG_TKCLS_SN		emvucdSprtPrcnMngTkclsSn		,
+		SPRT_SN		sprtSn		,
+		SBJCT_CD		sbjctCd		,
+		SBJCT_NM		sbjctNm		,
+		EDNST_CD		ednstCd		,
+		EDNST_NM		ednstNm		,
+		TKCLS_PERIOD		tkclsPeriod
+	</sql>
+	<sql id="KoreahanaEmvPrcTkcTable">
+	    TB_EMVUCD_SPRT_PRCN_MNG_TKCLS
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.emv.vo.KoreahanaEmvPrcTkcVO" resultType="exts.koreahana.emv.vo.KoreahanaEmvPrcTkcVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaEmvPrcTkcColumn"/>
+				FROM
+					<include refid="KoreahanaEmvPrcTkcTable"/>
+				<include refid="KoreahanaEmvPrcTkcWhere"/>
+				ORDER BY
+					EMVUCD_SPRT_PRCN_MNG_TKCLS_SN ASC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.emv.vo.KoreahanaEmvPrcTkcVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaEmvPrcTkcTable"/>
+		<include refid="KoreahanaEmvPrcTkcWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.emv.vo.KoreahanaEmvPrcTkcVO" resultType="exts.koreahana.emv.vo.KoreahanaEmvPrcTkcVO">
+		SELECT
+			<include refid="KoreahanaEmvPrcTkcColumn"/>
+		FROM
+			<include refid="KoreahanaEmvPrcTkcTable"/>
+		WHERE
+			EMVUCD_SPRT_PRCN_MNG_TKCLS_SN = #{emvucdSprtPrcnMngTkclsSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.emv.vo.KoreahanaEmvPrcTkcVO">
+		<selectKey resultType="string" keyProperty="emvucdSprtPrcnMngTkclsSn" order="BEFORE">
+			SELECT SEQ_TB_EMVUCD_SPRT_PRCN_MNG_TKCLS.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_EMVUCD_SPRT_PRCN_MNG_TKCLS (
+			EMVUCD_SPRT_PRCN_MNG_TKCLS_SN		,
+			SPRT_SN		,
+			SBJCT_CD		,
+			SBJCT_NM		,
+			EDNST_CD		,
+			EDNST_NM		,
+			TKCLS_PERIOD
+		) VALUES (
+			#{emvucdSprtPrcnMngTkclsSn}		,
+			#{sprtSn}		,
+			#{sbjctCd}		,
+			#{sbjctNm}		,
+			#{ednstCd}		,
+			#{ednstNm}		,
+			#{tkclsPeriod}
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.emv.vo.KoreahanaEmvPrcTkcVO">
+		UPDATE 
+			TB_EMVUCD_SPRT_PRCN_MNG_TKCLS
+		SET
+			SBJCT_CD	=	#{sbjctCd}		,
+			SBJCT_NM	=	#{sbjctNm}		,
+			EDNST_CD	=	#{ednstCd}		,
+			EDNST_NM	=	#{ednstNm}		,
+			TKCLS_PERIOD	=	#{tkclsPeriod}
+		WHERE
+			EMVUCD_SPRT_PRCN_MNG_TKCLS_SN = #{emvucdSprtPrcnMngTkclsSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.emv.vo.KoreahanaEmvPrcTkcVO">
+		DELETE FROM
+			TB_EMVUCD_SPRT_PRCN_MNG_TKCLS
+		WHERE
+			SPRT_SN = #{sprtSn}
+	</update>	
+</mapper>

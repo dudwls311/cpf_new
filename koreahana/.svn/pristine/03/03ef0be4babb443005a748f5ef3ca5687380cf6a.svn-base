@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.eml.KoreahanaEml">
+		
+	<sql id="KoreahanaEmlWhere">
+		<include refid="exts.mapper.koreahana.spr.KoreahanaSpr.KoreahanaSprComWhere"/>
+		<if test='hanactCd != null and !hanactCd.equals("")'>			<!-- 하나센터코드 -->
+			AND es.HANACT_CD = #{hanactCd}
+		</if>
+	</sql>
+	<sql id="KoreahanaEmlColumn">
+		s.SPRT_SN	sprtSn		,
+		FN_CRYPTO_DEC(s.FLNM,'${scrKey}')		flnm		,
+		s.GENDER_CD	genderCd	,
+		FN_CRYPTO_DEC(s.BRDT_YMD,'${scrKey}')	brdtYmd		,
+		FN_CRYPTO_DEC(s.MBPHNO,'${scrKey}')		mbphno		,
+		FN_CRYPTO_DEC(s.ZIP,'${scrKey}')		zip		,
+		FN_CRYPTO_DEC(s.ADDR,'${scrKey}')		addr		,
+		FN_CRYPTO_DEC(s.DADDR,'${scrKey}')		daddr		,
+		s.SPRT_STTS_CD		sprtSttsCd		,
+		s.RSN		rsn		,
+		s.RGTR_ID             rgtrId  ,
+		s.MDFR_ID            mdfrId ,
+		s.REG_DT                regDt    ,
+		s.MDFCN_DT               mdfcnDt   ,
+		s.DEL_YN                  delYn   ,
+		
+		p.PBANCRC_SN		pbancrcSn		,
+		p.PBANCRC_CTGRY_FRST_CD		pbancrcCtgryFrstCd		,
+		p.BIZ_SE_CD       bizSeCd    ,
+		p.RLS_YN          rlsYn      ,
+		p.PBANCRC_NM		pbancrcNm		,
+		p.PBANCRC_CN		pbancrcCn		,
+		p.INQ_CNT		inqCnt		,
+		p.PBANCRC_BGNG_DT		pbancrcBgngDt ,
+		p.PBANCRC_END_DT		pbancrcEndDt ,
+		FN_GET_PBANCRC_STTS(p.PBANCRC_BGNG_DT, p.PBANCRC_END_DT) pbancrcSttsCd ,
+		
+		jco.ORG_NM		hanactNm		,
+		
+		es.HANAWON_FNSH_YR		hanawonFnshYr		,
+		es.ENTCNY_YMD		entcnyYmd		,
+		es.HNW_TH		hnwTh		,
+		es.DSCSN_YMD		dscsnYmd		,
+		es.HANACT_CD		hanactCd		,
+		FN_CRYPTO_DEC(es.CNSL_FLNM,'${scrKey}')		cnslFlnm		,
+		FN_CRYPTO_DEC(es.EML,'${scrKey}')				eml		,
+		es.BACNT_BANK_CD		bacntBankCd		,
+		FN_CRYPTO_DEC(es.ACTNO,'${scrKey}')				actno		,
+		FN_CRYPTO_DEC(es.DPSTR,'${scrKey}')				dpstr		,
+		es.ACTNO_RMRK			actnoRmrk			,
+		es.EXCV_MTHD_CD			excvMthdCd			,
+		es.EXCV_MTHD_ETC			excvMthdEtc				,
+		es.FRST_CNSL_YMD			frstCnslYmd
+		
+	</sql>
+	<sql id="KoreahanaEmlTable">
+	    TB_SPRT s 
+	    LEFT JOIN TB_EMLVEX_SPRT es ON (s.SPRT_SN = es.SPRT_SN)
+	    INNER JOIN TB_PBANCRC p ON (p.PBANCRC_SN = s.PBANCRC_SN AND p.DEL_YN = 'N')
+	    LEFT JOIN JNITCMSORG jco ON (es.HANACT_CD = jco.ORG_ID AND jco.ISDEL = 0)
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.eml.vo.KoreahanaEmlVO" resultType="exts.koreahana.eml.vo.KoreahanaEmlVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaEmlColumn"/>
+				FROM
+					<include refid="KoreahanaEmlTable"/>
+				<include refid="KoreahanaEmlWhere"/>
+				ORDER BY
+					s.SPRT_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.eml.vo.KoreahanaEmlVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaEmlTable"/>
+		<include refid="KoreahanaEmlWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.eml.vo.KoreahanaEmlVO" resultType="exts.koreahana.eml.vo.KoreahanaEmlVO">
+		SELECT
+			<include refid="KoreahanaEmlColumn"/>
+		FROM
+			<include refid="KoreahanaEmlTable"/>
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_SN = #{sprtSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.eml.vo.KoreahanaEmlVO">
+		INSERT INTO TB_EMLVEX_SPRT (
+			SPRT_SN		,
+			HANAWON_FNSH_YR		,
+			ENTCNY_YMD		,
+			HNW_TH		,
+			DSCSN_YMD		,
+			HANACT_CD		,
+			CNSL_FLNM		,
+			EML		,
+			BACNT_BANK_CD		,
+			ACTNO		,
+			DPSTR		,
+			ACTNO_RMRK	,
+			EXCV_MTHD_CD			,
+			EXCV_MTHD_ETC	,
+			FRST_CNSL_YMD
+		) VALUES (
+			#{sprtSn}		,
+			#{hanawonFnshYr}		,
+			REPLACE(#{entcnyYmd}, '-', '')		,
+			#{hnwTh}		,
+			REPLACE(#{dscsnYmd}, '-', '')		,
+			#{hanactCd}		,
+			FN_CRYPTO_ENC(#{cnslFlnm},'${scrKey}')		,
+			FN_CRYPTO_ENC(#{eml},'${scrKey}')		,
+			#{bacntBankCd}		,
+			FN_CRYPTO_ENC(#{actno},'${scrKey}')		,
+			FN_CRYPTO_ENC(#{dpstr},'${scrKey}')		,
+			#{actnoRmrk}			,
+			#{excvMthdCd}			,
+			#{excvMthdEtc}		,
+			REPLACE(#{frstCnslYmd}, '-', '')
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.eml.vo.KoreahanaEmlVO">
+		UPDATE 
+			TB_EMLVEX_SPRT
+		SET
+			HANAWON_FNSH_YR	=	#{hanawonFnshYr}		,
+			ENTCNY_YMD	=	REPLACE(#{entcnyYmd}, '-', '')		,
+			HNW_TH	=	#{hnwTh}		,
+			DSCSN_YMD	=	REPLACE(#{dscsnYmd}, '-', '')		,
+			HANACT_CD	=	#{hanactCd}		,
+			CNSL_FLNM	=	FN_CRYPTO_ENC(#{cnslFlnm},'${scrKey}')		,
+			EML	=	FN_CRYPTO_ENC(#{eml},'${scrKey}')		,
+			BACNT_BANK_CD	=	#{bacntBankCd}		,
+			ACTNO	=	FN_CRYPTO_ENC(#{actno},'${scrKey}')		,
+			DPSTR	=	FN_CRYPTO_ENC(#{dpstr},'${scrKey}')		,
+			ACTNO_RMRK	=	#{actnoRmrk}			,
+			EXCV_MTHD_CD = #{excvMthdCd}			,
+			EXCV_MTHD_ETC = #{excvMthdEtc}		,
+			FRST_CNSL_YMD = REPLACE(#{frstCnslYmd}, '-', '')
+		WHERE
+			1 = 1
+			AND SPRT_SN = #{sprtSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.eml.vo.KoreahanaEmlVO">
+		DELETE FROM
+			TB_EMLVEX_SPRT
+		WHERE
+			SPRT_SN = #{sprtSn}
+	</update>
+</mapper>

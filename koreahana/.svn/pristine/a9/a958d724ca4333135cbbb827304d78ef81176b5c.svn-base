@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.smb.KoreahanaSmbTyp">
+		
+	<sql id="KoreahanaSmbTypWhere">
+		WHERE
+			DEL_YN = 'N'
+			AND PBANCRC_SN = #{pbancrcSn}
+		<if test='smbsnDocTypeSnList != null'>
+			<foreach open="AND SMBSN_DOC_TYPE_SN IN (" close=")" item="item" index="index" collection="smbsnDocTypeSnList" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<if test='smbsnDocTypeVlList != null'>
+			<foreach open="AND SMBSN_DOC_TYPE_VL IN (" close=")" item="item" index="index" collection="smbsnDocTypeVlList" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	</sql>
+	<sql id="KoreahanaSmbTypColumn">
+		SMBSN_DOC_TYPE_SN		smbsnDocTypeSn		,
+		PBANCRC_SN		pbancrcSn		,
+		SMBSN_DOC_TYPE_VL		smbsnDocTypeVl		,
+		DEL_YN                  delYn 
+	</sql>
+	<sql id="KoreahanaSmbTypTable">
+	    TB_SMBSN_DOC_TYPE
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.smb.vo.KoreahanaSmbTypVO" resultType="exts.koreahana.smb.vo.KoreahanaSmbTypVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaSmbTypColumn"/>
+				FROM
+					<include refid="KoreahanaSmbTypTable"/>
+				<include refid="KoreahanaSmbTypWhere"/>
+				ORDER BY
+					SMBSN_DOC_TYPE_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.smb.vo.KoreahanaSmbTypVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaSmbTypTable"/>
+		<include refid="KoreahanaSmbTypWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.smb.vo.KoreahanaSmbTypVO" resultType="exts.koreahana.smb.vo.KoreahanaSmbTypVO">
+		SELECT
+			<include refid="KoreahanaSmbTypColumn"/>
+		FROM
+			<include refid="KoreahanaSmbTypTable"/>
+		WHERE
+			DEL_YN = 'N'
+			AND SMBSN_DOC_TYPE_SN = #{smbsnDocTypeSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.smb.vo.KoreahanaSmbTypVO">
+		<selectKey resultType="string" keyProperty="smbsnDocTypeSn" order="BEFORE">
+			SELECT SEQ_TB_SMBSN_DOC_TYPE.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_SMBSN_DOC_TYPE (
+			SMBSN_DOC_TYPE_SN		,
+			PBANCRC_SN		,
+			SMBSN_DOC_TYPE_VL		,
+			DEL_YN
+		) VALUES (
+			#{smbsnDocTypeSn}		,
+			#{pbancrcSn}		,
+			#{smbsnDocTypeVl}		,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.smb.vo.KoreahanaSmbTypVO">
+		UPDATE 
+			TB_SMBSN_DOC_TYPE
+		SET
+			SMBSN_DOC_TYPE_VL	=	#{smbsnDocTypeVl}
+		WHERE
+			1 = 1
+			AND SMBSN_DOC_TYPE_SN = #{smbsnDocTypeSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.smb.vo.KoreahanaSmbTypVO">
+		UPDATE
+			TB_SMBSN_DOC_TYPE
+		SET
+			DEL_YN             = 'Y'
+		WHERE
+			1 = 1
+			AND PBANCRC_SN = #{pbancrcSn}
+			AND SMBSN_DOC_TYPE_SN = #{smbsnDocTypeSn}
+	</update>
+	
+	<update id="deleteList" parameterType="exts.koreahana.smb.vo.KoreahanaSmbTypVO">
+		UPDATE
+			TB_SMBSN_DOC_TYPE
+		SET
+			DEL_YN             = 'Y'
+		WHERE
+			1 = 1
+			AND PBANCRC_SN = #{pbancrcSn}
+			<foreach open="AND SMBSN_DOC_TYPE_SN IN (" close=")" item="item" index="index" collection="smbsnDocTypeSnList" separator=",">
+				#{item}
+			</foreach>
+	</update>
+</mapper>

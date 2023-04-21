@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.adt.KoreahanaAdtFam">
+		
+	<sql id="KoreahanaAdtFamWhere">
+		WHERE
+			1 = 1
+			AND SPRT_SN = #{sprtSn}
+		<!--
+		<if test='aplcntRelCd != null and !aplcntRelCd.equals("")'>
+			AND APLCNT_REL_CD = #{aplcntRelCd}
+		</if>
+		<if test='famFlnm != null and !famFlnm.equals("")'>
+			AND FAM_FLNM = #{famFlnm}
+		</if>
+
+		-->
+		
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>	<!-- 전체 -->
+					AND SPRT_SN LIKE '%'||#{searchKeyword}||'%'
+				</when>
+				<when test='"1".equals(searchCondition)'>	<!-- 제목 -->
+					AND SPRT_SN LIKE '%'||#{searchKeyword}||'%'
+				</when>
+				<when test='"2".equals(searchCondition)'>	<!-- 내용 -->
+					
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaAdtFamColumn">
+		FAM_REL_SN		famRelSn		,
+		SPRT_SN		sprtSn		,
+		APLCNT_REL_CD		aplcntRelCd		,
+		FAM_FLNM		famFlnm
+	</sql>
+	<sql id="KoreahanaAdtFamTable">
+	    TB_ADTN_AMT_SPRT_FAM_REL
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.adt.vo.KoreahanaAdtFamVO" resultType="exts.koreahana.adt.vo.KoreahanaAdtFamVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaAdtFamColumn"/>
+				FROM
+					<include refid="KoreahanaAdtFamTable"/>
+				<include refid="KoreahanaAdtFamWhere"/>
+				ORDER BY
+					FAM_REL_SN ASC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.adt.vo.KoreahanaAdtFamVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaAdtFamTable"/>
+		<include refid="KoreahanaAdtFamWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.adt.vo.KoreahanaAdtFamVO" resultType="exts.koreahana.adt.vo.KoreahanaAdtFamVO">
+		SELECT
+			<include refid="KoreahanaAdtFamColumn"/>
+		FROM
+			<include refid="KoreahanaAdtFamTable"/>
+		WHERE
+			1 = 1
+			AND FAM_REL_SN = #{famRelSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.adt.vo.KoreahanaAdtFamVO">
+		<selectKey resultType="string" keyProperty="famRelSn" order="BEFORE">
+			SELECT SEQ_TB_ADTN_AMT_SPRT_FAM_REL.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_ADTN_AMT_SPRT_FAM_REL (
+			FAM_REL_SN		,
+			SPRT_SN		,
+			APLCNT_REL_CD		,
+			FAM_FLNM
+		) VALUES (
+			#{famRelSn}		,
+			#{sprtSn}		,
+			#{aplcntRelCd}		,
+			#{famFlnm}
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.adt.vo.KoreahanaAdtFamVO">
+		UPDATE 
+			TB_ADTN_AMT_SPRT_FAM_REL
+		SET
+			APLCNT_REL_CD	=	#{aplcntRelCd}		,
+			FAM_FLNM	=	#{famFlnm}
+		WHERE
+			1 = 1
+			AND FAM_REL_SN = #{famRelSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.adt.vo.KoreahanaAdtFamVO">
+		DELETE FROM
+			TB_ADTN_AMT_SPRT_FAM_REL
+		WHERE
+			1 = 1
+			AND SPRT_SN = #{sprtSn}
+	</update>	
+</mapper>

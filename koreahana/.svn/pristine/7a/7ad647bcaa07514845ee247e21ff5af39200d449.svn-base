@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.frm.KoreahanaFrm">
+		
+	<sql id="KoreahanaFrmWhere">
+		WHERE
+			DEL_YN = 'N'
+		<if test='sprtYr != null and !sprtYr.equals("")'>
+			AND SPRT_YR = #{sprtYr}
+		</if>
+		<if test='sprtCycl != null and !sprtCycl.equals("")'>
+			AND SPRT_CYCL = #{sprtCycl}
+		</if>
+		<if test='newYn != null and !newYn.equals("")'>
+			AND NEW_YN = #{newYn}
+		</if>
+		<if test='flnm != null and !flnm.equals("")'>
+			AND FLNM = FN_CRYPTO_ENC(#{flnm},'${scrKey}')
+		</if>
+		<if test='genderCd != null and !genderCd.equals("")'>
+			AND GENDER_CD = #{genderCd}
+		</if>
+		<if test='brdtYmd != null and !brdtYmd.equals("")'>
+			AND BRDT_YMD = FN_CRYPTO_ENC(#{brdtYmd},'${scrKey}')
+		</if>
+		<if test='prtdcsYmd != null and !prtdcsYmd.equals("")'>
+			AND PRTDCS_YMD = #{prtdcsYmd}
+		</if>
+		<if test='entcnyYmd != null and !entcnyYmd.equals("")'>
+			AND ENTCNY_YMD = #{entcnyYmd}
+		</if>
+		<!--
+		<if test='mbphno != null and !mbphno.equals("")'>
+			AND MBPHNO = #{mbphno}
+		</if>
+		<if test='addr != null and !addr.equals("")'>
+			AND ADDR = #{addr}
+		</if>
+		<if test='frscpkEdu != null and !frscpkEdu.equals("")'>
+			AND FRSCPK_EDU = #{frscpkEdu}
+		</if>
+		<if test='newYn != null and !newYn.equals("")'>
+			AND NEW_YN = #{newYn}
+		</if>
+		<if test='sprtYr != null and !sprtYr.equals("")'>
+			AND SPRT_YR = #{sprtYr}
+		</if>
+		<if test='sprtCycl != null and !sprtCycl.equals("")'>
+			AND SPRT_CYCL = #{sprtCycl}
+		</if>
+		<if test='sprtDcsnAmt != null and !sprtDcsnAmt.equals("")'>
+			AND SPRT_DCSN_AMT = #{sprtDcsnAmt}
+		</if>
+		<if test='sprtAmt != null and !sprtAmt.equals("")'>
+			AND SPRT_AMT = #{sprtAmt}
+		</if>
+		<if test='prchsBzenty != null and !prchsBzenty.equals("")'>
+			AND PRCHS_BZENTY = #{prchsBzenty}
+		</if>
+		<if test='prchsItem != null and !prchsItem.equals("")'>
+			AND PRCHS_ITEM = #{prchsItem}
+		</if>
+		<if test='rmrk != null and !rmrk.equals("")'>
+			AND RMRK = #{rmrk}
+		</if>
+		<if test='sprtSttsCd != null and !sprtSttsCd.equals("")'>
+			AND SPRT_STTS_CD = #{sprtSttsCd}
+		</if>
+		<if test='rsn != null and !rsn.equals("")'>
+			AND RSN = #{rsn}
+		</if>
+
+		-->
+		
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>	<!-- 전체 -->
+					AND FLNM LIKE '%'||#{searchKeyword}||'%'
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaFrmColumn">
+		FRM_SPFST_SN		frmSpfstSn		,
+		FN_CRYPTO_DEC(FLNM,'${scrKey}')		flnm		,
+		GENDER_CD		genderCd		,
+		FN_CRYPTO_DEC(BRDT_YMD,'${scrKey}')		brdtYmd		,
+		FN_CRYPTO_DEC(MBPHNO,'${scrKey}')		mbphno		,
+		PRTDCS_YMD		prtdcsYmd		,
+		ENTCNY_YMD		entcnyYmd		,
+		FN_CRYPTO_DEC(ADDR,'${scrKey}')		addr		,
+		FRSCPK_EDU		frscpkEdu		,
+		NEW_YN		newYn		,
+		SPRT_YR		sprtYr		,
+		SPRT_CYCL		sprtCycl		,
+		SPRT_DCSN_AMT		sprtDcsnAmt		,
+		SPRT_AMT		sprtAmt		,
+		PRCHS_BZENTY		prchsBzenty		,
+		PRCHS_ITEM		prchsItem		,
+		RMRK		rmrk		,
+		SPRT_STTS_CD		sprtSttsCd		,
+		RSN		rsn		,
+
+		RGTR_ID             rgtrId  ,
+		MDFR_ID            mdfrId ,
+		REG_DT                regDt    ,
+		MDFCN_DT               mdfcnDt   ,
+		DEL_YN                  delYn 
+	</sql>
+	<sql id="KoreahanaFrmTable">
+	    TB_FRM_SPFST
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.frm.vo.KoreahanaFrmVO" resultType="exts.koreahana.frm.vo.KoreahanaFrmVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaFrmColumn"/>
+				FROM
+					<include refid="KoreahanaFrmTable"/>
+				<include refid="KoreahanaFrmWhere"/>
+				ORDER BY
+					FRM_SPFST_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.frm.vo.KoreahanaFrmVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaFrmTable"/>
+		<include refid="KoreahanaFrmWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.frm.vo.KoreahanaFrmVO" resultType="exts.koreahana.frm.vo.KoreahanaFrmVO">
+		SELECT
+			<include refid="KoreahanaFrmColumn"/>
+		FROM
+			<include refid="KoreahanaFrmTable"/>
+		WHERE
+			DEL_YN = 'N'
+			AND FRM_SPFST_SN = #{frmSpfstSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.frm.vo.KoreahanaFrmVO">
+		<selectKey resultType="string" keyProperty="frmSpfstSn" order="BEFORE">
+			SELECT SEQ_TB_FRM_SPFST.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_FRM_SPFST (
+			FRM_SPFST_SN		,
+			FLNM		,
+			GENDER_CD		,
+			BRDT_YMD		,
+			MBPHNO		,
+			PRTDCS_YMD		,
+			ENTCNY_YMD		,
+			ADDR		,
+			FRSCPK_EDU		,
+			NEW_YN		,
+			SPRT_YR		,
+			SPRT_CYCL		,
+			SPRT_DCSN_AMT		,
+			SPRT_AMT		,
+			PRCHS_BZENTY		,
+			PRCHS_ITEM		,
+			RMRK		,
+			SPRT_STTS_CD		,
+			RSN		,
+
+			RGTR_ID     ,
+			MDFR_ID       ,
+			REG_DT        ,
+			MDFCN_DT        ,
+			DEL_YN
+		) VALUES (
+			#{frmSpfstSn}		,
+			FN_CRYPTO_ENC(#{flnm},'${scrKey}')		,
+			#{genderCd}		,
+			FN_CRYPTO_ENC(REPLACE(REPLACE(#{brdtYmd},'-',''),'.',''),'${scrKey}')		,
+			FN_CRYPTO_ENC(#{mbphno},'${scrKey}')		,
+			REPLACE(REPLACE(#{prtdcsYmd},'-',''),'.','')		,
+			REPLACE(REPLACE(#{entcnyYmd},'-',''),'.','')		,
+			FN_CRYPTO_ENC(#{addr},'${scrKey}')		,
+			#{frscpkEdu}		,
+			#{newYn}		,
+			#{sprtYr}		,
+			#{sprtCycl}		,
+			#{sprtDcsnAmt}		,
+			#{sprtAmt}		,
+			#{prchsBzenty}		,
+			#{prchsItem}		,
+			#{rmrk}		,
+			#{sprtSttsCd}		,
+			#{rsn}		,
+
+			#{rgtrId}   ,
+			#{mdfrId}     ,
+			SYSDATE     ,
+			SYSDATE     ,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.frm.vo.KoreahanaFrmVO">
+		UPDATE 
+			TB_FRM_SPFST
+		SET
+			FLNM	=	FN_CRYPTO_ENC(#{flnm},'${scrKey}')		,
+			GENDER_CD	=	#{genderCd}		,
+			BRDT_YMD	=	FN_CRYPTO_ENC(REPLACE(REPLACE(#{brdtYmd},'-',''),'.',''),'${scrKey}')		,
+			MBPHNO	=	FN_CRYPTO_ENC(#{mbphno},'${scrKey}')		,
+			PRTDCS_YMD	=	REPLACE(REPLACE(#{prtdcsYmd},'-',''),'.','')		,
+			ENTCNY_YMD	=	REPLACE(REPLACE(#{entcnyYmd},'-',''),'.','')		,
+			ADDR	=	FN_CRYPTO_ENC(#{addr},'${scrKey}')		,
+			FRSCPK_EDU	=	#{frscpkEdu}		,
+			NEW_YN	=	#{newYn}		,
+			SPRT_YR	=	#{sprtYr}		,
+			SPRT_CYCL	=	#{sprtCycl}		,
+			SPRT_DCSN_AMT	=	#{sprtDcsnAmt}		,
+			SPRT_AMT	=	#{sprtAmt}		,
+			PRCHS_BZENTY	=	#{prchsBzenty}		,
+			PRCHS_ITEM	=	#{prchsItem}		,
+			RMRK	=	#{rmrk}		,
+			SPRT_STTS_CD	=	#{sprtSttsCd}		,
+			RSN	=	#{rsn}		,
+
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND FRM_SPFST_SN = #{frmSpfstSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.frm.vo.KoreahanaFrmVO">
+		UPDATE
+			TB_FRM_SPFST
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND FRM_SPFST_SN = #{frmSpfstSn}
+	</update>
+	
+	
+	<select id="selectStatistic" parameterType="exts.koreahana.frm.vo.KoreahanaFrmVO" resultType="egovMap">
+		SELECT
+			SPRT_CYCL,
+			COUNT(*) CNT,
+			SUM(DECODE(NEW_YN,'Y',1,0)) NEW_YES_CNT,
+			SUM(DECODE(NEW_YN,'N',1,0)) NEW_NO_CNT,
+			SUM(SPRT_AMT) SPRT_AMT
+		FROM
+			TB_FRM_SPFST
+		WHERE
+			SPRT_YR = #{sprtYr}
+		GROUP BY
+			ROLLUP(SPRT_CYCL)
+		ORDER BY
+			SPRT_CYCL*1		
+	</select>	
+	
+	<select id="selectStatisticSprtYr" parameterType="exts.koreahana.frm.vo.KoreahanaFrmVO" resultType="egovMap">
+		SELECT
+			SPRT_YR,
+			COUNT(*) CNT,
+			SUM(DECODE(NEW_YN,'Y',1,0)) NEW_YES_CNT,
+			SUM(DECODE(NEW_YN,'N',1,0)) NEW_NO_CNT,
+			SUM(DECODE(NEW_YN,'Y',SPRT_AMT,0)) NEW_YES_AMT,
+			SUM(DECODE(NEW_YN,'N',SPRT_AMT,0)) NEW_NO_AMT,
+			SUM(SPRT_AMT) SPRT_AMT
+		FROM
+			TB_FRM_SPFST
+		GROUP BY
+			ROLLUP(SPRT_YR)
+	</select>	
+</mapper>

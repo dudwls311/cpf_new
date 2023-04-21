@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.vdo.KoreahanaVdoPrc">
+		
+	<sql id="KoreahanaVdoPrcWhere">
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_STTS_CD = #{sprtSttsCd}
+		<if test='pbancrcSn != null and !pbancrcSn.equals("")'>		<!-- 모집공고 -->
+			AND p.PBANCRC_SN = #{pbancrcSn}
+		</if>
+		<if test='rgtrId != null and !rgtrId.equals("")'>			<!-- 작성자 -->
+			AND s.RGTR_ID = #{rgtrId}
+		</if>
+		<if test='bizSeCd != null and !bizSeCd.equals("")'>			<!-- 사업구분 -->
+			AND p.BIZ_SE_CD = #{bizSeCd}
+		</if>
+		<if test='sprtSttsCd != null and !sprtSttsCd.equals("")'>	<!-- 지원상태 -->
+			AND s.SPRT_STTS_CD = #{sprtSttsCd}
+		</if>
+		<if test='regDtYr != null and !regDtYr.equals("")'>			<!-- 신청연도 -->
+			AND TO_CHAR(s.REG_DT, 'YYYY') = #{regDtYr}
+		</if>
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>			<!-- 지원대상 이름 -->
+					AND s.FLNM = FN_CRYPTO_ENC(#{searchKeyword},'${scrKey}')
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaVdoPrcColumn">
+		s.SPRT_SN	sprtSn		,
+		FN_CRYPTO_DEC(s.FLNM,'${scrKey}')		flnm		,
+		s.GENDER_CD	genderCd	,
+		FN_CRYPTO_DEC(s.BRDT_YMD,'${scrKey}')	brdtYmd		,
+		FN_CRYPTO_DEC(s.MBPHNO,'${scrKey}')		mbphno		,
+		FN_CRYPTO_DEC(s.ZIP,'${scrKey}')		zip		,
+		FN_CRYPTO_DEC(s.ADDR,'${scrKey}')		addr		,
+		FN_CRYPTO_DEC(s.DADDR,'${scrKey}')		daddr		,
+		s.SPRT_STTS_CD		sprtSttsCd		,
+		s.RSN		rsn		,
+		s.RGTR_ID             rgtrId  ,
+		s.MDFR_ID            mdfrId ,
+		s.REG_DT                regDt    ,
+		s.MDFCN_DT               mdfcnDt   ,
+		s.DEL_YN                  delYn   ,
+        
+        p.PBANCRC_SN		pbancrcSn		,
+		p.PBANCRC_CTGRY_FRST_CD		pbancrcCtgryFrstCd		,
+		p.BIZ_SE_CD       bizSeCd    ,
+		p.RLS_YN          rlsYn      ,
+		p.PBANCRC_NM		pbancrcNm		,
+		p.PBANCRC_CN		pbancrcCn		,
+		p.INQ_CNT		inqCnt		,
+		p.PBANCRC_BGNG_DT		pbancrcBgngDt ,
+		p.PBANCRC_END_DT		pbancrcEndDt ,
+		FN_GET_PBANCRC_STTS(p.PBANCRC_BGNG_DT, p.PBANCRC_END_DT) pbancrcSttsCd ,
+	
+		FN_CRYPTO_DEC(ma.NTKRDF_UNQ_NO,'${scrKey}')		ntkrdfUnqNo ,
+		ma.HANAWON_TH		hanawonTh		,
+		ma.ENTCNY_YMD			entcnyYmd	,
+		ma.PRTDCS_YMD			prtdcsYmd	,
+		ma.HANAWON_FNSH_YMD	hanawonFnshYmd	,
+	
+		ve.APLCNT_TYPE		aplcntType		,
+		ve.BRPLC_CD		brplcCd		,
+		ve.EXIST_BNF_CD		existBnfCd		,
+		ve.RCOBL_YN		rcoblYn		,
+		ve.RCOBL_SGNT_FILE_SN		rcoblSgntFileSn		,
+		ve.APLCNT_OGDP		aplcntOgdp		,
+		ve.NTKRDF_SE		ntkrdfSe		,
+		FN_CRYPTO_DEC(ve.NTKRDF_FLNM,'${scrKey}')		ntkrdfFlnm		,
+		ve.NTKRDF_HANAWON_TH		ntkrdfHanawonTh		,
+		ve.NTKRDF_ENTCNY_YR		ntkrdfEntcnyYr		,
+		ve.NTKRDF_ACRTFCT_FILE_SN		ntkrdfAcrtfctFileSn		,
+		ve.EDU_SPRT_TRPR_REL_CD		eduSprtTrprRelCd		,
+		ve.EDU_SPRT_TRPR_REL_DTL		eduSprtTrprRelDtl		,
+		FN_CRYPTO_DEC(ve.PRTCR_FLNM,'${scrKey}')		prtcrFlnm		,
+		ve.PRTCR_GENDER_CD		prtcrGenderCd		,
+		FN_CRYPTO_DEC(ve.PRTCR_BRDT_YMD,'${scrKey}')		prtcrBrdtYmd		,
+		FN_CRYPTO_DEC(ve.PRTCR_MBPHNO,'${scrKey}')		prtcrMbphno		,
+		FN_CRYPTO_DEC(ve.PRTCR_ZIP,'${scrKey}')		prtcrZip		,
+		FN_CRYPTO_DEC(ve.PRTCR_ADDR,'${scrKey}')		prtcrAddr		,
+		FN_CRYPTO_DEC(ve.PRTCR_DADDR,'${scrKey}')		prtcrDaddr		,
+		ve.SGNT_FILE_SN		sgntFileSn		,
+		FN_CRYPTO_DEC(ve.SGNTR_FLNM,'${scrKey}')		sgntrFlnm		,
+		ve.PRTCR_SGNT_FILE_SN		prtcrSgntFileSn		,
+		FN_CRYPTO_DEC(ve.PRTCR_SGNTR_FLNM,'${scrKey}')		prtcrSgntrFlnm,
+		
+		vepm.VDOENG_EDU_PRCN_MNG_SN		vdoengEduPrcnMngSn		,
+		vepm.SPRT_SN		sprtSn		,
+		vepm.LNBK_DPCN_TRGT_YN		lnbkDpcnTrgtYn		,
+		vepm.MDW_GBKHM_YMD		mdwGbkhmYmd		,
+		vepm.GBKHM_RSN		gbkhmRsn		
+	</sql>
+	<sql id="KoreahanaVdoPrcTable">
+	    TB_SPRT s 
+	    LEFT JOIN TB_VDOENG_EDU ve ON (s.SPRT_SN = ve.SPRT_SN)
+	    LEFT JOIN TB_VDOENG_EDU_PRCN_MNG vepm ON (s.SPRT_SN = vepm.SPRT_SN AND vepm.DEL_YN = 'N')
+	    INNER JOIN TB_PBANCRC p ON (p.PBANCRC_SN = s.PBANCRC_SN AND p.DEL_YN = 'N')
+	    LEFT JOIN TB_MBR_ADTIFM ma ON (s.RGTR_ID = ma.MBR_ID)
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.vdo.vo.KoreahanaVdoPrcVO" resultType="exts.koreahana.vdo.vo.KoreahanaVdoPrcVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaVdoPrcColumn"/>
+				FROM
+					<include refid="KoreahanaVdoPrcTable"/>
+				<include refid="KoreahanaVdoPrcWhere"/>
+				ORDER BY
+					s.SPRT_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.vdo.vo.KoreahanaVdoPrcVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaVdoPrcTable"/>
+		<include refid="KoreahanaVdoPrcWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.vdo.vo.KoreahanaVdoPrcVO" resultType="exts.koreahana.vdo.vo.KoreahanaVdoPrcVO">
+		SELECT
+			<include refid="KoreahanaVdoPrcColumn"/>
+		FROM
+			<include refid="KoreahanaVdoPrcTable"/>
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_STTS_CD = #{sprtSttsCd}
+			AND s.SPRT_SN = #{sprtSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.vdo.vo.KoreahanaVdoPrcVO">
+		<selectKey resultType="string" keyProperty="vdoengEduPrcnMngSn" order="BEFORE">
+			SELECT SEQ_TB_VDOENG_EDU_PRCN_MNG.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_VDOENG_EDU_PRCN_MNG (
+			VDOENG_EDU_PRCN_MNG_SN		,
+			SPRT_SN		,
+			LNBK_DPCN_TRGT_YN		,
+			MDW_GBKHM_YMD		,
+			GBKHM_RSN		,
+
+			RGTR_ID     ,
+			MDFR_ID       ,
+			REG_DT        ,
+			MDFCN_DT        ,
+			DEL_YN
+		) VALUES (
+			#{vdoengEduPrcnMngSn}		,
+			#{sprtSn}		,
+			#{lnbkDpcnTrgtYn}		,
+			REPLACE(REPLACE(#{mdwGbkhmYmd},'-',''),'.','')		,
+			#{gbkhmRsn}		,
+
+			#{rgtrId}   ,
+			#{mdfrId}     ,
+			SYSDATE     ,
+			SYSDATE     ,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.vdo.vo.KoreahanaVdoPrcVO">
+		UPDATE 
+			TB_VDOENG_EDU_PRCN_MNG
+		SET
+			SPRT_SN	=	#{sprtSn}		,
+			LNBK_DPCN_TRGT_YN	=	#{lnbkDpcnTrgtYn}		,
+			MDW_GBKHM_YMD	=	REPLACE(REPLACE(#{mdwGbkhmYmd},'-',''),'.','')		,
+			GBKHM_RSN	=	#{gbkhmRsn}		,
+
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND SPRT_SN = #{sprtSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.vdo.vo.KoreahanaVdoPrcVO">
+		UPDATE
+			TB_VDOENG_EDU_PRCN_MNG
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND SPRT_SN = #{sprtSn}
+	</update>
+	
+	
+	<select id="selectListExcel" parameterType="exts.koreahana.vdo.vo.KoreahanaVdoPrcVO" resultType="exts.koreahana.vdo.vo.KoreahanaVdoPrcExcelVO">
+		SELECT
+			<include refid="KoreahanaVdoPrcColumn"/>
+		FROM
+			<include refid="KoreahanaVdoPrcTable"/>
+		<include refid="KoreahanaVdoPrcWhere"/>
+		ORDER BY
+			s.SPRT_SN DESC
+	</select>	
+</mapper>

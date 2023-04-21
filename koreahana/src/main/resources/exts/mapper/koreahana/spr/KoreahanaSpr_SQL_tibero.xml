@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.spr.KoreahanaSpr">
+
+	<!-- 지원에서 사용하는 공통 WHERE문 -->
+	<sql id="KoreahanaSprComWhere">
+		WHERE
+			s.DEL_YN = 'N'
+			AND p.PBANCRC_CTGRY_FRST_CD = #{pbancrcCtgryFrstCd}
+		<if test='pbancrcSn != null and !pbancrcSn.equals("")'>		<!-- 모집공고 -->
+			AND p.PBANCRC_SN = #{pbancrcSn}
+		</if>
+		<if test='rgtrId != null and !rgtrId.equals("")'>			<!-- 작성자 -->
+			AND s.RGTR_ID = #{rgtrId}
+		</if>
+		<if test='bizSeCd != null and !bizSeCd.equals("")'>			<!-- 사업구분 -->
+			AND p.BIZ_SE_CD = #{bizSeCd}
+		</if>
+		<if test='sprtSttsCd != null and !sprtSttsCd.equals("")'>	<!-- 지원상태 -->
+			AND s.SPRT_STTS_CD = #{sprtSttsCd}
+		</if>
+		<if test='regDtYr != null and !regDtYr.equals("")'>			<!-- 신청연도 -->
+			AND TO_CHAR(s.REG_DT, 'YYYY') = #{regDtYr}
+		</if>
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>			<!-- 지원대상 이름 -->
+					AND s.FLNM = FN_CRYPTO_ENC(#{searchKeyword},'${scrKey}')
+				</when>
+			</choose>
+		</if>
+		<if test='notInsprtSttsCdList != null'>						<!-- 지외할 상태값 -->
+			<foreach open="AND s.SPRT_STTS_CD NOT IN (" close=")" item="item" index="index" collection="notInsprtSttsCdList" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	</sql>
+
+	
+	<sql id="KoreahanaSprWhere">
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.RGTR_ID = #{rgtrId}
+		<if test='pbancrcSn != null and !pbancrcSn.equals("")'>
+			AND s.PBANCRC_SN = #{pbancrcSn}
+		</if>
+		<if test='pbancrcCtgryFrstCdList != null'>						<!-- 첫번째 범주 목록 -->
+			<foreach open="AND p.PBANCRC_CTGRY_FRST_CD IN (" close=")" item="item" index="index" collection="pbancrcCtgryFrstCdList" separator=",">
+				#{item}
+			</foreach>
+		</if>
+		<!--
+		<if test='flnm != null and !flnm.equals("")'>
+			AND s.FLNM = #{flnm}
+		</if>
+		<if test='genderCd != null and !genderCd.equals("")'>
+			AND s.GENDER_CD = #{genderCd}
+		</if>
+		<if test='brdtYmd != null and !brdtYmd.equals("")'>
+			AND s.BRDT_YMD = #{brdtYmd}
+		</if>
+		<if test='mbphno != null and !mbphno.equals("")'>
+			AND s.MBPHNO = #{mbphno}
+		</if>
+		<if test='zip != null and !zip.equals("")'>
+			AND s.ZIP = #{zip}
+		</if>
+		<if test='addr != null and !addr.equals("")'>
+			AND s.ADDR = #{addr}
+		</if>
+		<if test='daddr != null and !daddr.equals("")'>
+			AND s.DADDR = #{daddr}
+		</if>
+		<if test='sprtSttsCd != null and !sprtSttsCd.equals("")'>
+			AND s.SPRT_STTS_CD = #{sprtSttsCd}
+		</if>
+		<if test='rsn != null and !rsn.equals("")'>
+			AND s.RSN = #{rsn}
+		</if>
+
+		-->
+		
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>
+					AND FN_CRYPTO_DEC(s.FLNM,'${scrKey}') = #{searchKeyword}
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaSprColumn">
+		s.SPRT_SN            sprtSn            ,
+		s.PBANCRC_SN         pbancrcSn         ,
+		FN_CRYPTO_DEC(s.FLNM,'${scrKey}')               flnm              ,
+		s.GENDER_CD          genderCd          ,
+		FN_CRYPTO_DEC(s.BRDT_YMD,'${scrKey}')           brdtYmd           ,
+		FN_CRYPTO_DEC(s.MBPHNO,'${scrKey}')             mbphno            ,
+		FN_CRYPTO_DEC(s.ZIP,'${scrKey}')                zip               ,
+		FN_CRYPTO_DEC(s.ADDR,'${scrKey}')               addr              ,
+		FN_CRYPTO_DEC(s.DADDR,'${scrKey}')              daddr             ,
+		s.TMPR_STRG_DATA     tmprStrgData      ,
+		s.SPRT_STTS_CD       sprtSttsCd        ,
+		s.RSN                rsn               ,
+		s.REG_DT             regDt             ,
+		s.RGTR_ID            rgtrId            ,
+		s.MDFCN_DT           mdfcnDt           ,
+		s.MDFR_ID            mdfrId            ,
+		s.DEL_YN             delYn             ,
+		
+		FN_CRYPTO_DEC(ma.NTKRDF_UNQ_NO,'${scrKey}')		ntkrdfUnqNo ,
+		ma.HANAWON_TH		hanawonTh		,
+		ma.ENTCNY_YMD			entcnyYmd	,
+		ma.PRTDCS_YMD			prtdcsYmd	,
+		ma.HANAWON_FNSH_YMD	hanawonFnshYmd	,
+		
+		p.PBANCRC_SN				pbancrcSn		,
+		p.PBANCRC_CTGRY_FRST_CD		pbancrcCtgryFrstCd		,
+		p.BIZ_SE_CD       			bizSeCd    ,
+		p.RLS_YN          			rlsYn      ,
+		p.PBANCRC_NM				pbancrcNm		,
+		p.PBANCRC_CN				pbancrcCn		,
+		p.INQ_CNT					inqCnt		,
+		p.PBANCRC_BGNG_DT			pbancrcBgngDt ,
+		p.PBANCRC_END_DT			pbancrcEndDt ,
+		FN_GET_PBANCRC_STTS(p.PBANCRC_BGNG_DT, p.PBANCRC_END_DT) pbancrcSttsCd
+	</sql>
+	<sql id="KoreahanaSprTable">
+	    TB_SPRT s
+		INNER JOIN TB_PBANCRC p ON ( s.PBANCRC_SN = p.PBANCRC_SN AND p.DEL_YN = 'N' )
+		LEFT JOIN TB_MBR_ADTIFM ma ON (s.RGTR_ID = ma.MBR_ID)
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.spr.vo.KoreahanaSprVO" resultType="exts.koreahana.spr.vo.KoreahanaSprVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaSprColumn"/>
+				FROM
+					<include refid="KoreahanaSprTable"/>
+				<include refid="KoreahanaSprWhere"/>
+				ORDER BY
+					s.SPRT_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.spr.vo.KoreahanaSprVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaSprTable"/>
+		<include refid="KoreahanaSprWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.spr.vo.KoreahanaSprVO" resultType="exts.koreahana.spr.vo.KoreahanaSprVO">
+		SELECT
+			<include refid="KoreahanaSprColumn"/>
+		FROM
+			<include refid="KoreahanaSprTable"/>
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_SN = #{sprtSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.spr.vo.KoreahanaSprVO">
+		<selectKey resultType="string" keyProperty="sprtSn" order="BEFORE">
+			SELECT SEQ_TB_SPRT.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_SPRT (
+			SPRT_SN		,
+			PBANCRC_SN		,
+			FLNM		,
+			GENDER_CD		,
+			BRDT_YMD		,
+			MBPHNO		,
+			ZIP		,
+			ADDR		,
+			DADDR		,
+			TMPR_STRG_DATA		,
+			SPRT_STTS_CD		,
+			RSN		,
+
+			RGTR_ID     ,
+			MDFR_ID       ,
+			REG_DT        ,
+			MDFCN_DT        ,
+			DEL_YN
+		) VALUES (
+			#{sprtSn}		,
+			#{pbancrcSn}		,
+			FN_CRYPTO_ENC(#{flnm},'${scrKey}')		,
+			#{genderCd}		,
+			FN_CRYPTO_ENC(#{brdtYmd},'${scrKey}')		,
+			FN_CRYPTO_ENC(#{mbphno},'${scrKey}')		,
+			FN_CRYPTO_ENC(#{zip},'${scrKey}')		,
+			FN_CRYPTO_ENC(#{addr},'${scrKey}')		,
+			FN_CRYPTO_ENC(#{daddr},'${scrKey}')		,
+			#{tmprStrgData}			,
+			#{sprtSttsCd}		,
+			#{rsn}		,
+
+			#{rgtrId}   ,
+			#{mdfrId}     ,
+			SYSDATE     ,
+			SYSDATE     ,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.spr.vo.KoreahanaSprVO">
+		UPDATE 
+			TB_SPRT
+		SET
+			FLNM	=	FN_CRYPTO_ENC(#{flnm},'${scrKey}')		,
+			GENDER_CD	=	#{genderCd}		,
+			BRDT_YMD	=	FN_CRYPTO_ENC(#{brdtYmd},'${scrKey}')		,
+			MBPHNO	=	FN_CRYPTO_ENC(#{mbphno},'${scrKey}')		,
+			ZIP	=	FN_CRYPTO_ENC(#{zip},'${scrKey}')		,
+			ADDR	=	FN_CRYPTO_ENC(#{addr},'${scrKey}')		,
+			DADDR	=	FN_CRYPTO_ENC(#{daddr},'${scrKey}')		,
+			TMPR_STRG_DATA = #{tmprStrgData}		,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND SPRT_SN = #{sprtSn}
+	</update>
+	
+	<update id="updateSttsRsn" parameterType="exts.koreahana.spr.vo.KoreahanaSprVO">
+		UPDATE 
+			TB_SPRT
+		SET
+			SPRT_STTS_CD	=	#{sprtSttsCd}		,
+			RSN	=	#{rsn}
+		WHERE
+			1 = 1
+			AND SPRT_SN = #{sprtSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.spr.vo.KoreahanaSprVO">
+		UPDATE
+			TB_SPRT
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND SPRT_SN = #{sprtSn}
+	</update>
+	
+	<select id="selectListGroupBySprtSttsCd" parameterType="exts.koreahana.spr.vo.KoreahanaSprVO" resultType="org.apache.commons.collections.map.CaseInsensitiveMap">
+		SELECT
+			s.SPRT_STTS_CD			sprtSttsCd	,
+			COUNT(s.SPRT_STTS_CD)		sprtSttsCnt
+		FROM
+			TB_SPRT s
+			<if test='searchJoinType != null and searchJoinType.equals("emv")'>
+				LEFT JOIN TB_EMVUCD e ON (s.SPRT_SN = e.SPRT_SN)
+			</if>
+			<if test='searchJoinType != null and searchJoinType.equals("eml")'>
+				LEFT JOIN TB_EMLVEX_SPRT e ON (s.SPRT_SN = e.SPRT_SN)
+			</if>
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_STTS_CD != '16006'
+			AND s.PBANCRC_SN = #{pbancrcSn}
+			<if test='searchJoinType != null and (searchJoinType.equals("emv") or searchJoinType.equals("eml"))'>
+				<if test='hanactCd != null and !hanactCd.equals("")'>			<!-- 하나센터코드(상담사) -->
+					AND e.HANACT_CD = #{hanactCd}
+				</if>
+			</if>
+		GROUP BY
+			s.SPRT_STTS_CD
+	</select>
+	
+	<select id="selectListGroupByRegDtYr" parameterType="exts.koreahana.spr.vo.KoreahanaSprVO" resultType="org.apache.commons.collections.map.CaseInsensitiveMap">
+		SELECT
+			TO_CHAR(s.REG_DT, 'YYYY')		regDtYr
+		FROM
+			TB_SPRT s
+			<if test='searchJoinType != null and searchJoinType.equals("emv")'>
+				LEFT JOIN TB_EMVUCD e ON (s.SPRT_SN = e.SPRT_SN)
+			</if>
+			<if test='searchJoinType != null and searchJoinType.equals("eml")'>
+				LEFT JOIN TB_EMLVEX_SPRT e ON (s.SPRT_SN = e.SPRT_SN)
+			</if>
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.PBANCRC_SN = #{pbancrcSn}
+			<if test='searchJoinType != null and (searchJoinType.equals("emv") or searchJoinType.equals("eml"))'>
+				<if test='hanactCd != null and !hanactCd.equals("")'>			<!-- 하나센터코드(상담사) -->
+					AND e.HANACT_CD = #{hanactCd}
+				</if>
+			</if>
+		GROUP BY
+			TO_CHAR(s.REG_DT, 'YYYY')
+	</select>
+	
+	<select id="selectListSprtCnt" parameterType="exts.koreahana.spr.vo.KoreahanaSprVO" resultType="org.apache.commons.collections.map.CaseInsensitiveMap">
+		SELECT
+			PBANCRC_SN			pbancrcSn		,
+			COUNT(PBANCRC_SN)	sprtCnt
+		FROM
+			TB_SPRT
+		WHERE
+			DEL_YN = 'N'
+			AND SPRT_STTS_CD != '16006'
+			<foreach open="AND PBANCRC_SN IN (" close=")" item="item" index="index" collection="pbancrcSnList" separator=",">
+				#{item}
+			</foreach>
+		GROUP BY
+			PBANCRC_SN
+	</select>
+	
+	
+	<sql id="KoreahanaSprHistoryWhere">
+		WHERE
+				1 = 1
+			<if test='pbancrcCtgryFrstCd != null and !pbancrcCtgryFrstCd.equals("")'>				<!-- 지원사업 -->
+				AND PBANCRC_CTGRY_FRST_CD = #{pbancrcCtgryFrstCd}
+			</if>
+			<if test='flnm != null and !flnm.equals("")'>						<!-- 이름 -->
+				AND FLNM = FN_CRYPTO_ENC(#{flnm},'${scrKey}')
+			</if>
+			<if test='brdtYmd != null and !brdtYmd.equals("")'>					<!-- 생년월일 -->
+				AND BRDT_YMD = FN_CRYPTO_ENC(#{brdtYmd},'${scrKey}')
+			</if>
+			<if test='ntkrdfUnqNo != null and !ntkrdfUnqNo.equals("")'>			<!-- 북한이탈주민번호 -->
+				AND NTKRDF_UNQ_NO = FN_CRYPTO_ENC(#{ntkrdfUnqNo},'${scrKey}')
+			</if>
+			<if test='entcnyYmd != null and !entcnyYmd.equals("")'>				<!-- 입국일 -->
+				AND ENTCNY_YMD = REPLACE(#{entcnyYmd}, '-', '')
+			</if>
+			<if test='prtdcsYmd != null and !prtdcsYmd.equals("")'>				<!-- 보호결정일 -->
+				AND PRTDCS_YMD = REPLACE(#{prtdcsYmd}, '-', '')
+			</if>
+			<if test='hanawonTh != null and !hanawonTh.equals("")'>				<!-- 하나원기수 -->
+				AND HANAWON_TH = #{hanawonTh}
+			</if>
+			<if test='hanawonFnshYmd != null and !hanawonFnshYmd.equals("")'>	<!-- 하나원 수료일 -->
+				AND HANAWON_FNSH_YMD = REPLACE(#{hanawonFnshYmd}, '-', '')
+			</if>
+	</sql>
+	
+	<select id="selectTotHistory" parameterType="exts.koreahana.spr.vo.KoreahanaSprVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			VW_SPRT_HISTORY
+		<include refid="KoreahanaSprHistoryWhere"/>
+	</select>
+	
+	<select id="selectListHistory" parameterType="exts.koreahana.spr.vo.KoreahanaSprHistoryVO" resultType="exts.koreahana.spr.vo.KoreahanaSprHistoryVO">
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					PBANCRC_CTGRY_FRST_CD				pbancrcCtgryFrstCd
+					, SPRT_SN				sprtSn
+					, FN_CRYPTO_DEC(FLNM,'${scrKey}')					flnm
+					, FN_CRYPTO_DEC(BRDT_YMD,'${scrKey}')				brdtYmd
+					, ENTCNY_YMD			entcnyYmd
+					, PRTDCS_YMD			prtdcsYmd
+					, HANAWON_TH			hanawonTh
+					, HANAWON_FNSH_YMD		hanawonFnshYmd
+					, FN_CRYPTO_DEC(NTKRDF_UNQ_NO,'${scrKey}')			ntkrdfUnqNo
+					, REG_DT				regDt
+					, GIVE_YMD				giveYmd
+				FROM
+					VW_SPRT_HISTORY
+				<include refid="KoreahanaSprHistoryWhere"/>
+				ORDER BY
+					SPRT_SN DESC
+					
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+	</select>
+	
+</mapper>

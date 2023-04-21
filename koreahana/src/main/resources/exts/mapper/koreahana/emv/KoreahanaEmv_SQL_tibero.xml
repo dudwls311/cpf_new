@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.emv.KoreahanaEmv">
+		
+	<sql id="KoreahanaEmvWhere">
+		<include refid="exts.mapper.koreahana.spr.KoreahanaSpr.KoreahanaSprComWhere"/>
+		<if test='hanactCd != null and !hanactCd.equals("")'>			<!-- 하나센터코드 -->
+			AND e.HANACT_CD = #{hanactCd}
+		</if>
+	</sql>
+	<sql id="KoreahanaEmvColumn">
+		s.SPRT_SN	sprtSn		,
+		FN_CRYPTO_DEC(s.FLNM,'${scrKey}')		flnm		,
+		s.GENDER_CD	genderCd	,
+		FN_CRYPTO_DEC(s.BRDT_YMD,'${scrKey}')	brdtYmd		,
+		FN_CRYPTO_DEC(s.MBPHNO,'${scrKey}')		mbphno		,
+		FN_CRYPTO_DEC(s.ZIP,'${scrKey}')		zip		,
+		FN_CRYPTO_DEC(s.ADDR,'${scrKey}')		addr		,
+		FN_CRYPTO_DEC(s.DADDR,'${scrKey}')		daddr		,
+		s.SPRT_STTS_CD		sprtSttsCd		,
+		s.RSN		rsn		,
+		s.RGTR_ID             rgtrId  ,
+		s.MDFR_ID            mdfrId ,
+		s.REG_DT                regDt    ,
+		s.MDFCN_DT               mdfcnDt   ,
+		s.DEL_YN                  delYn   ,
+		
+		p.PBANCRC_SN		pbancrcSn		,
+		p.PBANCRC_CTGRY_FRST_CD		pbancrcCtgryFrstCd		,
+		p.BIZ_SE_CD       bizSeCd    ,
+		p.RLS_YN          rlsYn      ,
+		p.PBANCRC_NM		pbancrcNm		,
+		p.PBANCRC_CN		pbancrcCn		,
+		p.INQ_CNT		inqCnt		,
+		p.PBANCRC_BGNG_DT		pbancrcBgngDt ,
+		p.PBANCRC_END_DT		pbancrcEndDt ,
+		FN_GET_PBANCRC_STTS(p.PBANCRC_BGNG_DT, p.PBANCRC_END_DT) pbancrcSttsCd ,
+		
+		jco.ORG_NM		hanactNm		,
+		
+		e.HANACT_CD		hanactCd		,
+		e.HNW_TH		hnwTh		,
+		e.HANAWON_FNSH_YR		hanawonFnshYr		,
+		e.DSCSN_YMD		dscsnYmd		,
+		FN_CRYPTO_DEC(e.CNSL_FLNM,'${scrKey}')		cnslFlnm		,
+		FN_CRYPTO_DEC(e.EML,'${scrKey}')				eml
+	</sql>
+	<sql id="KoreahanaEmvTable">
+	    TB_SPRT s 
+	    LEFT JOIN TB_EMVUCD e ON (s.SPRT_SN = e.SPRT_SN)
+	    INNER JOIN TB_PBANCRC p ON (p.PBANCRC_SN = s.PBANCRC_SN AND p.DEL_YN = 'N')
+	    LEFT JOIN JNITCMSORG jco ON (e.HANACT_CD = jco.ORG_ID AND jco.ISDEL = 0)
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.emv.vo.KoreahanaEmvVO" resultType="exts.koreahana.emv.vo.KoreahanaEmvVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaEmvColumn"/>
+				FROM
+					<include refid="KoreahanaEmvTable"/>
+				<include refid="KoreahanaEmvWhere"/>
+				ORDER BY
+					s.SPRT_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.emv.vo.KoreahanaEmvVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaEmvTable"/>
+		<include refid="KoreahanaEmvWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.emv.vo.KoreahanaEmvVO" resultType="exts.koreahana.emv.vo.KoreahanaEmvVO">
+		SELECT
+			<include refid="KoreahanaEmvColumn"/>
+		FROM
+			<include refid="KoreahanaEmvTable"/>
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_SN = #{sprtSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.emv.vo.KoreahanaEmvVO">
+		INSERT INTO TB_EMVUCD (
+			SPRT_SN		,
+			HANACT_CD		,
+			HNW_TH		,
+			HANAWON_FNSH_YR		,
+			DSCSN_YMD		,
+			CNSL_FLNM		,
+			EML
+		) VALUES (
+			#{sprtSn}		,
+			#{hanactCd}		,
+			#{hnwTh}		,
+			#{hanawonFnshYr}		,
+			REPLACE(#{dscsnYmd}, '-', '')		,
+			FN_CRYPTO_ENC(#{cnslFlnm},'${scrKey}')		,
+			FN_CRYPTO_ENC(#{eml},'${scrKey}')
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.emv.vo.KoreahanaEmvVO">
+		UPDATE 
+			TB_EMVUCD
+		SET
+			HANACT_CD	=	#{hanactCd}		,
+			HNW_TH	=	#{hnwTh}		,
+			HANAWON_FNSH_YR	=	#{hanawonFnshYr}		,
+			DSCSN_YMD	=	REPLACE(#{dscsnYmd}, '-', '')		,
+			CNSL_FLNM	=	FN_CRYPTO_ENC(#{cnslFlnm},'${scrKey}')		,
+			EML = FN_CRYPTO_ENC(#{eml},'${scrKey}')
+		WHERE
+			SPRT_SN = #{sprtSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.emv.vo.KoreahanaEmvVO">
+		DELETE FROM
+			TB_EMVUCD
+		WHERE
+			SPRT_SN = #{sprtSn}
+	</update>	
+</mapper>

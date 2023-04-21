@@ -1,0 +1,2 @@
+SDBFILEAPICONF_PATH    환경변수 명
+C:\egov_3_10\workspace_koreahana\koreahana\src\main\webapp\WEB-INF\KSignSecureDB\JAVA_FileAPI\conf          (경로에 맞춰서)

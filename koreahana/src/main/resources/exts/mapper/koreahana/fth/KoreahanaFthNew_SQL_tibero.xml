@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.fth.KoreahanaFthNew">
+		
+	<sql id="KoreahanaFthNewWhere">
+		WHERE
+			DEL_YN = 'N'
+		<if test='rcptYear != null and !rcptYear.equals("")'>
+			AND SUBSTR(RCPT_YMD,1,4) = #{rcptYear}
+		</if>
+		<!--
+		<if test='flnm != null and !flnm.equals("")'>
+			AND FLNM = #{flnm}
+		</if>
+		<if test='rrno != null and !rrno.equals("")'>
+			AND RRNO = #{rrno}
+		</if>
+		<if test='ageCd != null and !ageCd.equals("")'>
+			AND AGE_CD = #{ageCd}
+		</if>
+		<if test='mbphno != null and !mbphno.equals("")'>
+			AND MBPHNO = #{mbphno}
+		</if>
+		<if test='ctpvCd != null and !ctpvCd.equals("")'>
+			AND CTPV_CD = #{ctpvCd}
+		</if>
+		<if test='sggCd != null and !sggCd.equals("")'>
+			AND SGG_CD = #{sggCd}
+		</if>
+		<if test='ecnmatCd != null and !ecnmatCd.equals("")'>
+			AND ECNMAT_CD = #{ecnmatCd}
+		</if>
+		<if test='crCd != null and !crCd.equals("")'>
+			AND CR_CD = #{crCd}
+		</if>
+		<if test='coNm != null and !coNm.equals("")'>
+			AND CO_NM = #{coNm}
+		</if>
+		<if test='emplisJoinYmd != null and !emplisJoinYmd.equals("")'>
+			AND EMPLIS_JOIN_YMD = #{emplisJoinYmd}
+		</if>
+		<if test='salaryAmt != null and !salaryAmt.equals("")'>
+			AND SALARY_AMT = #{salaryAmt}
+		</if>
+		<if test='entcnyYmd != null and !entcnyYmd.equals("")'>
+			AND ENTCNY_YMD = #{entcnyYmd}
+		</if>
+		<if test='entiscYmd != null and !entiscYmd.equals("")'>
+			AND ENTISC_YMD = #{entiscYmd}
+		</if>
+		<if test='trinsExpryYmd != null and !trinsExpryYmd.equals("")'>
+			AND TRINS_EXPRY_YMD = #{trinsExpryYmd}
+		</if>
+		<if test='rcptYmd != null and !rcptYmd.equals("")'>
+			AND RCPT_YMD = #{rcptYmd}
+		</if>
+		<if test='jrdcHanactNm != null and !jrdcHanactNm.equals("")'>
+			AND JRDC_HANACT_NM = #{jrdcHanactNm}
+		</if>
+		<if test='dcsnSprtAmt != null and !dcsnSprtAmt.equals("")'>
+			AND DCSN_SPRT_AMT = #{dcsnSprtAmt}
+		</if>
+		<if test='bbJoinYmd != null and !bbJoinYmd.equals("")'>
+			AND BB_JOIN_YMD = #{bbJoinYmd}
+		</if>
+		<if test='savingDdlnYmd != null and !savingDdlnYmd.equals("")'>
+			AND SAVING_DDLN_YMD = #{savingDdlnYmd}
+		</if>
+		<if test='prtprdExtsnCd != null and !prtprdExtsnCd.equals("")'>
+			AND PRTPRD_EXTSN_CD = #{prtprdExtsnCd}
+		</if>
+		<if test='idtprsSavingAmtActno != null and !idtprsSavingAmtActno.equals("")'>
+			AND IDTPRS_SAVING_AMT_ACTNO = #{idtprsSavingAmtActno}
+		</if>
+		<if test='stmchkActno != null and !stmchkActno.equals("")'>
+			AND STMCHK_ACTNO = #{stmchkActno}
+		</if>
+		<if test='rmrk != null and !rmrk.equals("")'>
+			AND RMRK = #{rmrk}
+		</if>
+		<if test='sprtSttsCd != null and !sprtSttsCd.equals("")'>
+			AND SPRT_STTS_CD = #{sprtSttsCd}
+		</if>
+		<if test='rsn != null and !rsn.equals("")'>
+			AND RSN = #{rsn}
+		</if>
+
+		-->
+		
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>	<!-- 전체 -->
+					AND FLNM = FN_CRYPTO_ENC(#{searchKeyword},'${scrKey}')
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaFthNewColumn">
+		FTHPBB_NEW_APLY_SN		fthpbbNewAplySn		,
+		FN_CRYPTO_DEC(FLNM,'${scrKey}')		flnm		,
+		GENDER_CD		genderCd		,
+		FN_CRYPTO_DEC(RRNO,'${scrKey}')		rrno		,
+		AGE_CD		ageCd		,
+		FN_CRYPTO_DEC(MBPHNO,'${scrKey}')		mbphno		,
+		CTPV_CD		ctpvCd		,
+		SGG_CD		sggCd		,
+		ECNMAT_CD		ecnmatCd		,
+		CR_CD		crCd		,
+		CO_NM		coNm		,
+		EMPLIS_JOIN_YMD		emplisJoinYmd		,
+		SALARY_AMT		salaryAmt		,
+		ENTCNY_YMD		entcnyYmd		,
+		ENTISC_YMD		entiscYmd		,
+		TRINS_EXPRY_YMD		trinsExpryYmd		,
+		RCPT_YMD		rcptYmd		,
+		JRDC_HANACT_NM		jrdcHanactNm		,
+		DCSN_SPRT_AMT		dcsnSprtAmt		,
+		BB_JOIN_YMD		bbJoinYmd		,
+		SAVING_DDLN_YMD		savingDdlnYmd		,
+		PRTPRD_EXTSN_CD		prtprdExtsnCd		,
+		IDTPRS_SAVING_AMT_ACTNO		idtprsSavingAmtActno		,
+		STMCHK_ACTNO		stmchkActno		,
+		RMRK		rmrk		,
+		SPRT_STTS_CD		sprtSttsCd		,
+		RSN		rsn		,
+
+		RGTR_ID             rgtrId  ,
+		MDFR_ID            mdfrId ,
+		REG_DT                regDt    ,
+		MDFCN_DT               mdfcnDt   ,
+		DEL_YN                  delYn 
+	</sql>
+	<sql id="KoreahanaFthNewTable">
+	    TB_FTHPBB_NEW_APLY
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.fth.vo.KoreahanaFthNewVO" resultType="exts.koreahana.fth.vo.KoreahanaFthNewVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaFthNewColumn"/>
+				FROM
+					<include refid="KoreahanaFthNewTable"/>
+				<include refid="KoreahanaFthNewWhere"/>
+				ORDER BY
+					FTHPBB_NEW_APLY_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.fth.vo.KoreahanaFthNewVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaFthNewTable"/>
+		<include refid="KoreahanaFthNewWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.fth.vo.KoreahanaFthNewVO" resultType="exts.koreahana.fth.vo.KoreahanaFthNewVO">
+		SELECT
+			<include refid="KoreahanaFthNewColumn"/>
+		FROM
+			<include refid="KoreahanaFthNewTable"/>
+		WHERE
+			DEL_YN = 'N'
+			AND FTHPBB_NEW_APLY_SN = #{fthpbbNewAplySn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.fth.vo.KoreahanaFthNewVO">
+		<selectKey resultType="string" keyProperty="fthpbbNewAplySn" order="BEFORE">
+			SELECT SEQ_TB_FTHPBB_NEW_APLY.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_FTHPBB_NEW_APLY (
+			FTHPBB_NEW_APLY_SN		,
+			FLNM		,
+			GENDER_CD		,
+			RRNO		,
+			AGE_CD		,
+			MBPHNO		,
+			CTPV_CD		,
+			SGG_CD		,
+			ECNMAT_CD		,
+			CR_CD		,
+			CO_NM		,
+			EMPLIS_JOIN_YMD		,
+			SALARY_AMT		,
+			ENTCNY_YMD		,
+			ENTISC_YMD		,
+			TRINS_EXPRY_YMD		,
+			RCPT_YMD		,
+			JRDC_HANACT_NM		,
+			DCSN_SPRT_AMT		,
+			BB_JOIN_YMD		,
+			SAVING_DDLN_YMD		,
+			PRTPRD_EXTSN_CD		,
+			IDTPRS_SAVING_AMT_ACTNO		,
+			STMCHK_ACTNO		,
+			RMRK		,
+			SPRT_STTS_CD		,
+			RSN		,
+
+			RGTR_ID     ,
+			MDFR_ID       ,
+			REG_DT        ,
+			MDFCN_DT        ,
+			DEL_YN
+		) VALUES (
+			#{fthpbbNewAplySn}		,
+			FN_CRYPTO_ENC(#{flnm},'${scrKey}')		,
+			#{genderCd}		,
+			FN_CRYPTO_ENC(REPLACE(#{rrno},'-',''),'${scrKey}')		,
+			#{ageCd}		,
+			FN_CRYPTO_ENC(#{mbphno},'${scrKey}')		,
+			#{ctpvCd}		,
+			#{sggCd}		,
+			#{ecnmatCd}		,
+			#{crCd}		,
+			#{coNm}		,
+			REPLACE(REPLACE(#{emplisJoinYmd},'-',''),'.','')		,
+			#{salaryAmt}		,
+			REPLACE(REPLACE(#{entcnyYmd},'-',''),'.','')		,
+			REPLACE(REPLACE(#{entiscYmd},'-',''),'.','')		,
+			REPLACE(REPLACE(#{trinsExpryYmd},'-',''),'.','')		,
+			REPLACE(REPLACE(#{rcptYmd},'-',''),'.','')		,
+			#{jrdcHanactNm}		,
+			#{dcsnSprtAmt}		,
+			REPLACE(REPLACE(#{bbJoinYmd},'-',''),'.','')		,
+			REPLACE(REPLACE(#{savingDdlnYmd},'-',''),'.','')		,
+			#{prtprdExtsnCd}		,
+			#{idtprsSavingAmtActno}		,
+			#{stmchkActno}		,
+			#{rmrk}		,
+			#{sprtSttsCd}		,
+			#{rsn}		,
+
+			#{rgtrId}   ,
+			#{mdfrId}     ,
+			SYSDATE     ,
+			SYSDATE     ,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.fth.vo.KoreahanaFthNewVO">
+		UPDATE 
+			TB_FTHPBB_NEW_APLY
+		SET
+			FLNM	=	FN_CRYPTO_ENC(#{flnm},'${scrKey}')		,
+			GENDER_CD	=	#{genderCd}		,
+			RRNO	=	FN_CRYPTO_ENC(REPLACE(#{rrno},'-',''),'${scrKey}')		,
+			AGE_CD	=	#{ageCd}		,
+			MBPHNO	=	FN_CRYPTO_ENC(#{mbphno},'${scrKey}')		,
+			CTPV_CD	=	#{ctpvCd}		,
+			SGG_CD	=	#{sggCd}		,
+			ECNMAT_CD	=	#{ecnmatCd}		,
+			CR_CD	=	#{crCd}		,
+			CO_NM	=	#{coNm}		,
+			EMPLIS_JOIN_YMD	=	REPLACE(REPLACE(#{emplisJoinYmd},'-',''),'.','')		,
+			SALARY_AMT	=	#{salaryAmt}		,
+			ENTCNY_YMD	=	REPLACE(REPLACE(#{entcnyYmd},'-',''),'.','')		,
+			ENTISC_YMD	=	REPLACE(REPLACE(#{entiscYmd},'-',''),'.','')		,
+			TRINS_EXPRY_YMD	=	REPLACE(REPLACE(#{trinsExpryYmd},'-',''),'.','')		,
+			RCPT_YMD	=	REPLACE(REPLACE(#{rcptYmd},'-',''),'.','')		,
+			JRDC_HANACT_NM	=	#{jrdcHanactNm}		,
+			DCSN_SPRT_AMT	=	#{dcsnSprtAmt}		,
+			BB_JOIN_YMD	=	REPLACE(REPLACE(#{bbJoinYmd},'-',''),'.','')		,
+			SAVING_DDLN_YMD	=	REPLACE(REPLACE(#{savingDdlnYmd},'-',''),'.','')		,
+			PRTPRD_EXTSN_CD	=	#{prtprdExtsnCd}		,
+			IDTPRS_SAVING_AMT_ACTNO	=	#{idtprsSavingAmtActno}		,
+			STMCHK_ACTNO	=	#{stmchkActno}		,
+			RMRK	=	#{rmrk}		,
+			SPRT_STTS_CD	=	#{sprtSttsCd}		,
+			RSN	=	#{rsn}		,
+
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND FTHPBB_NEW_APLY_SN = #{fthpbbNewAplySn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.fth.vo.KoreahanaFthNewVO">
+		UPDATE
+			TB_FTHPBB_NEW_APLY
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND FTHPBB_NEW_APLY_SN = #{fthpbbNewAplySn}
+	</update>
+	
+	
+	
+	<select id="selectStatisticJoinYm" parameterType="exts.koreahana.fth.vo.KoreahanaFthNewVO" resultType="egovMap">
+		SELECT
+			COUNT(*) CNT,
+			SUBSTR(BB_JOIN_YMD,1,4) BB_JOIN_YEAR,
+			SUBSTR(BB_JOIN_YMD,5,2) BB_JOIN_MONTH
+		FROM
+			TB_FTHPBB_NEW_APLY
+		WHERE
+			DEL_YN = 'N'
+		GROUP BY
+			ROLLUP(SUBSTR(BB_JOIN_YMD,1,4),SUBSTR(BB_JOIN_YMD,5,2))
+		ORDER BY
+			SUBSTR(BB_JOIN_YMD,1,4),
+			SUBSTR(BB_JOIN_YMD,5,2)
+	</select>	
+	<select id="selectStatisticSprtAmt" parameterType="exts.koreahana.fth.vo.KoreahanaFthNewVO" resultType="egovMap">
+		SELECT
+			COUNT(*) CNT,
+			DCSN_SPRT_AMT,
+			ROUND(RATIO_TO_REPORT(COUNT(*)) OVER(PARTITION BY GROUPING(DCSN_SPRT_AMT)) * 100, 2) AMT_PERCENT
+		FROM
+			TB_FTHPBB_NEW_APLY
+		WHERE
+			DEL_YN = 'N'
+		GROUP BY
+			ROLLUP(DCSN_SPRT_AMT)	
+	</select>	
+	<select id="selectStatisticGenderAge" parameterType="exts.koreahana.fth.vo.KoreahanaFthNewVO" resultType="egovMap">
+		SELECT
+			COUNT(*) CNT,
+			SUBSTR(BB_JOIN_YMD,1,4) BB_JOIN_YEAR,
+			AGE_CD,
+			GENDER_CD
+		FROM
+			TB_FTHPBB_NEW_APLY
+		WHERE
+			DEL_YN = 'N'
+		GROUP BY
+			ROLLUP(SUBSTR(BB_JOIN_YMD,1,4),AGE_CD, GENDER_CD)
+		ORDER BY
+			SUBSTR(BB_JOIN_YMD,1,4)
+	</select>
+</mapper>

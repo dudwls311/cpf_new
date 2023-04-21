@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.smb.KoreahanaSmbMpn">
+		
+	<sql id="KoreahanaSmbMpnWhere">
+		WHERE
+			1 = 1
+			AND af.DEL_YN = 'N'
+			AND sdm.SPRT_SN = #{sprtSn}
+		<if test='smbDocMpngSnList != null'>
+			<foreach open="AND sdm.SMB_DOC_MPNG_SN IN (" close=")" item="item" index="index" collection="smbDocMpngSnList" separator=",">
+				#{item}
+			</foreach>
+		</if>
+	</sql>
+	<sql id="KoreahanaSmbMpnColumn">
+		sdm.SMB_DOC_MPNG_SN		smbDocMpngSn		,
+		sdm.SPRT_SN				sprtSn				,
+		sdm.SMBSN_DOC_SN		smbsnDocSn		,
+		sdm.ATCH_FILE_SN		atchFileSn      ,
+		
+		af.ORGNL_ATCH_FILE_NM	orgnlAtchFileNm	,
+		af.ATCH_FILE_NM		atchFileNm		,
+		af.ATCH_FILE_SZ		atchFileSz		,
+		af.ATCH_FILE_EXTN_NM	atchFileExtnNm	,
+		af.ATCH_FILE_PATH_NM	atchFilePathNm  ,
+		af.RGTR_ID             rgtrId          ,
+		af.MDFR_ID             mdfrId          ,
+		af.REG_DT              regDt           ,
+		af.MDFCN_DT            mdfcnDt         ,
+		af.DEL_YN              delYn
+	</sql>
+	
+	<sql id="KoreahanaSmbMpnTable">
+	    TB_SPRT_SMB_DOC_MPNG sdm
+	    INNER JOIN TB_SMBSN_DOC sd ON (sd.SMBSN_DOC_SN = sdm.SMBSN_DOC_SN AND sd.DEL_YN = 'N')
+	    INNER JOIN TB_ATCH_FILE af ON (sdm.ATCH_FILE_SN = af.ATCH_FILE_SN)
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.smb.vo.KoreahanaSmbMpnVO" resultType="exts.koreahana.smb.vo.KoreahanaSmbMpnVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaSmbMpnColumn"/>
+				FROM
+					<include refid="KoreahanaSmbMpnTable"/>
+				<include refid="KoreahanaSmbMpnWhere"/>
+				ORDER BY
+					sdm.SMB_DOC_MPNG_SN ASC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.smb.vo.KoreahanaSmbMpnVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaSmbMpnTable"/>
+		<include refid="KoreahanaSmbMpnWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.smb.vo.KoreahanaSmbMpnVO" resultType="exts.koreahana.smb.vo.KoreahanaSmbMpnVO">
+		SELECT
+			<include refid="KoreahanaSmbMpnColumn"/>
+		FROM
+			<include refid="KoreahanaSmbMpnTable"/>
+		WHERE
+			sdm.SMB_DOC_MPNG_SN = #{smbDocMpngSn}
+			AND sdm.SPRT_SN = #{sprtSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.smb.vo.KoreahanaSmbMpnVO">
+		<selectKey resultType="string" keyProperty="smbDocMpngSn" order="BEFORE">
+			SELECT
+			    	SEQ_TB_SPRT_SMB_DOC_MPNG.NEXTVAL
+			FROM DUAL  			      
+		</selectKey>
+		INSERT INTO
+			TB_SPRT_SMB_DOC_MPNG
+		(
+			SMB_DOC_MPNG_SN		,
+			SPRT_SN		,
+			SMBSN_DOC_SN		,
+			ATCH_FILE_SN
+		) VALUES (
+			#{smbDocMpngSn}		,
+			#{sprtSn}		,
+			#{smbsnDocSn}		,
+			#{atchFileSn}
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.smb.vo.KoreahanaSmbMpnVO">
+		UPDATE 
+			TB_SPRT_SMB_DOC_MPNG
+		SET
+			ATCH_FILE_SN	=	#{atchFileSn}
+		WHERE
+			1 = 1
+			AND SMB_DOC_MPNG_SN = #{smbDocMpngSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.smb.vo.KoreahanaSmbMpnVO">
+		DELETE FROM
+			TB_SPRT_SMB_DOC_MPNG
+		WHERE
+			1 = 1
+			AND SMB_DOC_MPNG_SN = #{smbDocMpngSn}
+	</update>
+	
+	<update id="deleteList" parameterType="exts.koreahana.smb.vo.KoreahanaSmbMpnVO">
+		DELETE FROM
+			TB_SPRT_SMB_DOC_MPNG
+		WHERE
+			1 = 1
+			AND SPRT_SN = #{sprtSn}
+			<if test='smbDocMpngSnList != null'>
+				<foreach open="AND SMB_DOC_MPNG_SN IN (" close=")" item="item" index="index" collection="smbDocMpngSnList" separator=",">
+					#{item}
+				</foreach>
+			</if>
+	</update>
+</mapper>

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.emp.KoreahanaEmp">
+		
+	<sql id="KoreahanaEmpWhere">
+		<include refid="exts.mapper.koreahana.spr.KoreahanaSpr.KoreahanaSprComWhere"/>
+	</sql>
+	<sql id="KoreahanaEmpColumn">
+		s.SPRT_SN	sprtSn		,
+		FN_CRYPTO_DEC(s.FLNM,'${scrKey}')		flnm		,
+		s.GENDER_CD	genderCd	,
+		FN_CRYPTO_DEC(s.BRDT_YMD,'${scrKey}')	brdtYmd		,
+		FN_CRYPTO_DEC(s.MBPHNO,'${scrKey}')		mbphno		,
+		FN_CRYPTO_DEC(s.ZIP,'${scrKey}')		zip		,
+		FN_CRYPTO_DEC(s.ADDR,'${scrKey}')		addr		,
+		FN_CRYPTO_DEC(s.DADDR,'${scrKey}')		daddr		,
+		s.SPRT_STTS_CD		sprtSttsCd		,
+		s.RSN		rsn		,
+		s.RGTR_ID             rgtrId  ,
+		s.MDFR_ID            mdfrId ,
+		s.REG_DT                regDt    ,
+		s.MDFCN_DT               mdfcnDt   ,
+		s.DEL_YN                  delYn   ,
+		
+        p.PBANCRC_SN		pbancrcSn		,
+		p.PBANCRC_CTGRY_FRST_CD		pbancrcCtgryFrstCd		,
+		p.BIZ_SE_CD       bizSeCd    ,
+		p.RLS_YN          rlsYn      ,
+		p.PBANCRC_NM		pbancrcNm		,
+		p.PBANCRC_CN		pbancrcCn		,
+		p.INQ_CNT		inqCnt		,
+		p.PBANCRC_BGNG_DT		pbancrcBgngDt ,
+		p.PBANCRC_END_DT		pbancrcEndDt ,
+		FN_GET_PBANCRC_STTS(p.PBANCRC_BGNG_DT, p.PBANCRC_END_DT) pbancrcSttsCd	,
+	
+		FN_CRYPTO_DEC(ma.NTKRDF_UNQ_NO,'${scrKey}')		ntkrdfUnqNo ,
+		ma.HANAWON_TH		hanawonTh		,
+		ma.ENTCNY_YMD			entcnyYmd	,
+		ma.PRTDCS_YMD			prtdcsYmd	,
+		ma.HANAWON_FNSH_YMD	hanawonFnshYmd	,
+	
+		ev.LAST_ACBG_SCHL_NM		lastAcbgSchlNm		,
+		ev.LAST_ACBG_SCHL_GRDTN_CD		lastAcbgSchlGrdtnCd		,
+		ev.LAST_ACBG_MJR_NM		lastAcbgMjrNm		,
+		ev.EMPM_STTS_YN		empmSttsYn		,
+		ev.EMPM_WRC_NM		empmWrcNm		,
+		ev.HGVLC_YN		hgvlcYn		,
+		ev.BUS_DRVNG_CRTFCT_YN		busDrvngCrtfctYn		,
+		ev.HOPE_TRPTT_BZENTY		hopeTrpttBzenty		,
+		ev.RSNAPLC		rsnaplc		,
+		ev.SGNT_FILE_SN		sgntFileSn		,
+		FN_CRYPTO_DEC(ev.SGNTR_FLNM,'${scrKey}')		sgntrFlnm 
+	</sql>
+	<sql id="KoreahanaEmpTable">
+	    TB_SPRT s 
+	    LEFT JOIN TB_EMPCNN_VOCTRN ev ON (s.SPRT_SN = ev.SPRT_SN)
+	    INNER JOIN TB_PBANCRC p ON (p.PBANCRC_SN = s.PBANCRC_SN AND p.DEL_YN = 'N')
+	    LEFT JOIN TB_MBR_ADTIFM ma ON (s.RGTR_ID = ma.MBR_ID)
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.emp.vo.KoreahanaEmpVO" resultType="exts.koreahana.emp.vo.KoreahanaEmpVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaEmpColumn"/>
+				FROM
+					<include refid="KoreahanaEmpTable"/>
+				<include refid="KoreahanaEmpWhere"/>
+				ORDER BY
+					s.SPRT_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.emp.vo.KoreahanaEmpVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaEmpTable"/>
+		<include refid="KoreahanaEmpWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.emp.vo.KoreahanaEmpVO" resultType="exts.koreahana.emp.vo.KoreahanaEmpVO">
+		SELECT
+			<include refid="KoreahanaEmpColumn"/>
+		FROM
+			<include refid="KoreahanaEmpTable"/>
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_SN = #{sprtSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.emp.vo.KoreahanaEmpVO">
+		INSERT INTO TB_EMPCNN_VOCTRN (
+			SPRT_SN		,
+			LAST_ACBG_SCHL_NM		,
+			LAST_ACBG_SCHL_GRDTN_CD		,
+			LAST_ACBG_MJR_NM		,
+			EMPM_STTS_YN		,
+			EMPM_WRC_NM		,
+			HGVLC_YN		,
+			BUS_DRVNG_CRTFCT_YN		,
+			HOPE_TRPTT_BZENTY		,
+			RSNAPLC		,
+			SGNT_FILE_SN		,
+			SGNTR_FLNM
+		) VALUES (
+			#{sprtSn}		,
+			#{lastAcbgSchlNm}		,
+			#{lastAcbgSchlGrdtnCd}		,
+			#{lastAcbgMjrNm}		,
+			#{empmSttsYn}		,
+			#{empmWrcNm}		,
+			#{hgvlcYn}		,
+			#{busDrvngCrtfctYn}		,
+			#{hopeTrpttBzenty}		,
+			#{rsnaplc}		,
+			#{sgntFileSn}		,
+			FN_CRYPTO_ENC(#{sgntrFlnm},'${scrKey}')
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.emp.vo.KoreahanaEmpVO">
+		UPDATE 
+			TB_EMPCNN_VOCTRN
+		SET
+			LAST_ACBG_SCHL_NM	=	#{lastAcbgSchlNm}		,
+			LAST_ACBG_SCHL_GRDTN_CD	=	#{lastAcbgSchlGrdtnCd}		,
+			LAST_ACBG_MJR_NM	=	#{lastAcbgMjrNm}		,
+			EMPM_STTS_YN	=	#{empmSttsYn}		,
+			EMPM_WRC_NM	=	#{empmWrcNm}		,
+			HGVLC_YN	=	#{hgvlcYn}		,
+			BUS_DRVNG_CRTFCT_YN	=	#{busDrvngCrtfctYn}		,
+			HOPE_TRPTT_BZENTY	=	#{hopeTrpttBzenty}		,
+			RSNAPLC	=	#{rsnaplc}		,
+			SGNT_FILE_SN	=	#{sgntFileSn}		,
+			SGNTR_FLNM	=	FN_CRYPTO_ENC(#{sgntrFlnm},'${scrKey}')
+		WHERE
+			SPRT_SN = #{sprtSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.emp.vo.KoreahanaEmpVO">
+		DELETE FROM
+			TB_EMPCNN_VOCTRN
+		WHERE
+			SPRT_SN = #{sprtSn}
+	</update>
+	
+	<select id="selectListExcel" parameterType="exts.koreahana.emp.vo.KoreahanaEmpVO" resultType="exts.koreahana.emp.vo.KoreahanaEmpVO">
+		SELECT
+			<include refid="KoreahanaEmpColumn"/> ,
+			<include refid="exts.mapper.com.ComMbr.mbrAdtColumn"/>
+		FROM
+			<include refid="KoreahanaEmpTable"/>
+			<include refid="exts.mapper.com.ComMbr.mbrAdtTable"/>
+		<include refid="KoreahanaEmpWhere"/>
+		ORDER BY
+			s.SPRT_SN DESC
+	</select>
+</mapper>

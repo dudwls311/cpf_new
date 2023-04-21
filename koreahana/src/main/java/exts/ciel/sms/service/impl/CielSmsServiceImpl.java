@@ -1,0 +1,96 @@
+package exts.ciel.sms.service.impl;
+
+import javax.annotation.Resource;
+
+import org.joda.time.DateTime;
+import org.springframework.stereotype.Service;
+
+import egovframework.com.cmm.service.Globals;
+import egovframework.com.utl.fcc.service.NullUtil;
+import egovframework.com.utl.fcc.service.SessionUtil;
+import egovframework.rte.fdl.cmmn.exception.EgovBizException;
+import egovframework.rte.fdl.cmmn.exception.FdlException;
+import exts.ciel.sms.service.CielSmsService;
+import exts.ciel.sms.vo.CielSmsResultVO;
+import exts.ciel.sms.vo.CielSmsVO;
+import exts.com.service.impl.ExtsAbstractServiceImpl;
+import exts.koreahana.sms.service.KoreahanaSmsLogService;
+import exts.koreahana.sms.vo.KoreahanaSmsLogVO;
+
+/**
+ * @Class Name : CielSmsServiceImpl.java
+ * @Description : 문자전송시스템 ServiceImpl
+ * @Modification Information
+ * 
+ * @author
+ * @since 2022.08.26
+ * @version 1.0
+ * @see Copyright (C) by  All right reserved.
+ */
+@Service("cielSmsService")
+public class CielSmsServiceImpl extends ExtsAbstractServiceImpl implements CielSmsService {
+	// ////////////////////// Resource 선언 영역 ///////////////////////////////////////////////////////////////////
+	@Resource(name = "cielSmsDao")
+	private CielSmsDao cielSmsDao;
+
+	@Resource(name = "koreahanaSmsLogService")
+	private KoreahanaSmsLogService koreahanaSmsLogService;
+	
+	/**
+	 * 추가 / 수정
+	 * 
+	 * @param searchVO
+	 * @param detailList
+	 * @throws FdlException 
+	 * @throws Exception
+	 */
+	public boolean sendSms(CielSmsVO searchVO) throws EgovBizException {
+		searchVO.setUserId(Globals.SMS_SYSTEM_CODE);
+		searchVO.setSubCode(Globals.SMS_SUB_CODE);
+		searchVO.setCurrentdate(new DateTime().toString("yyyy-MM-dd HH:mm:ss"));
+		boolean isSuccess = false;
+		try {
+			if("".equals(NullUtil.nullString(searchVO.getTargetNumber()))) throwBizException("exts.error.koreahana.mbr.smsTargetNumberNotFound");
+			
+			log.debug("==========SMS==========_S");
+			log.debug("UserId : "+searchVO.getUserId());
+			log.debug("SubCode : "+searchVO.getSubCode());
+			log.debug("SendNumber : "+searchVO.getSendNumber());
+			log.debug("SendTitle : "+searchVO.getSendTitle());
+			log.debug("SendMessage : "+searchVO.getSendMessage());
+			log.debug("TargetNumber: "+searchVO.getTargetNumber());
+			log.debug("신청완료 :" + (searchVO.getSendMessage().contains("가산금")));
+			/*
+			if(result != null) {
+				log.debug("ReturnClidx: "+result.getReturnClidx());
+				log.debug("ReturnStat : "+result.getReturnStat());
+				KoreahanaSmsLogVO smsLogVO = new KoreahanaSmsLogVO();
+				smsLogVO.setClidx(result.getReturnClidx()+"");
+				smsLogVO.setStat(result.getReturnStat()+"");
+				koreahanaSmsLogService.writeKoreahanaSmsLog(smsLogVO);
+			}
+			*/
+			//if((searchVO.getSendMessage().contains("가산금")) != true) {
+				cielSmsDao.sendSms(searchVO);				
+			//}
+			isSuccess = true;
+			log.debug("==========SMS==========_E");
+		}catch(Exception e) {
+			log.error(e.getMessage());
+		}
+//		if(result != null && result.getReturnStat() != 0) log.error("[smsError] " + result.getReturnStat() + " | " + result.getReturnClidx());
+		return isSuccess;
+	}
+	/**
+	 * sms전송 리스트
+	 * 
+	 * @param searchVO
+	 * @return
+	 * @throws Exception
+	 */
+	public CielSmsResultVO selectKoreahanaSms(CielSmsResultVO searchVO) {
+		searchVO.setUserid(Globals.SMS_SYSTEM_CODE);
+		searchVO.setSubcode(Globals.SMS_SUB_CODE);
+		return cielSmsDao.selectKoreahanaSms(searchVO);
+	}
+}

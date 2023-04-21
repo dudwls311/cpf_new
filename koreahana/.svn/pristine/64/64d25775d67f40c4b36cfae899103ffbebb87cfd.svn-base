@@ -1,0 +1,30 @@
+#\uacbd\uc601\uac1c\uc120\uc790\uae08\uc9c0\uc6d0
+exts.item.koreahana.mgm = \uacbd\uc601\uac1c\uc120\uc790\uae08\uc9c0\uc6d0
+exts.item.koreahana.mgm.mgmipvAmtSprtSn = \uacbd\uc601\uac1c\uc120\uc790\uae08\uc9c0\uc6d0\uc77c\ub828\ubc88\ud638
+exts.item.koreahana.mgm.flnm = \uc131\uba85
+exts.item.koreahana.mgm.brdtYmd = \uc0dd\ub144\uc6d4\uc77c
+exts.item.koreahana.mgm.rrnoBknb = \uc8fc\ubbfc\ub4f1\ub85d\ubc88\ud638\ub4b7\ubc88\ud638
+exts.item.koreahana.mgm.hnwCycl = \ud558\ub098\uc6d0\uae30\uc218
+exts.item.koreahana.mgm.mbphno = \ud734\ub300\ud3f0\ubc88\ud638
+exts.item.koreahana.mgm.conm = \uc0c1\ud638\uba85
+exts.item.koreahana.mgm.bzstatCd = \uc5c5\ud0dc
+exts.item.koreahana.mgm.bzstatOsd = \uc5c5\ud0dc\uadf8\uc678
+exts.item.koreahana.mgm.tpbizNm = \uc5c5\uc885\uba85
+exts.item.koreahana.mgm.brno = \uc0ac\uc5c5\uc790\ub4f1\ub85d\ubc88\ud638
+exts.item.koreahana.mgm.bizStartYmd = \uc0ac\uc5c5\uac1c\uc2dc\uc77c
+exts.item.koreahana.mgm.addr = \uc8fc\uc18c
+exts.item.koreahana.mgm.carmdlCd = \ucc28\uc885
+exts.item.koreahana.mgm.mlg = \uc8fc\ud589\uac70\ub9ac
+exts.item.koreahana.mgm.vhclMdyr = \ucc28\ub7c9\uc5f0\uc2dd
+exts.item.koreahana.mgm.rcmtFldCd = \ubaa8\uc9d1\ubd84\uc57c
+exts.item.koreahana.mgm.sprtYr = \uc9c0\uc6d0\uc5f0\ub3c4
+exts.item.koreahana.mgm.dcsnAmt = \uacb0\uc815\uae08\uc561
+exts.item.koreahana.mgm.prchsDsctn = \uad6c\ub9e4\ub0b4\uc5ed
+exts.item.koreahana.mgm.prchsAmt = \uad6c\ub9e4\uae08\uc561
+exts.item.koreahana.mgm.giveAmt = \uc9c0\uae09\uae08\uc561
+exts.item.koreahana.mgm.giveCycl = \uc9c0\uae09\ucc28\uc218
+exts.item.koreahana.mgm.rmrk = \ube44\uace0
+exts.item.koreahana.mgm.sprtSttsCd = \uc9c0\uc6d0\uc0c1\ud0dc\ucf54\ub4dc
+exts.item.koreahana.mgm.rsn = \uc0ac\uc720
+
+exts.error.koreahana.mgm.wrong.rrnoBknb = \uc8fc\ubbfc\ub4f1\ub85d\ubc88\ud638\ub4b7\ubc88\ud638\ub294 7\uc790\ub9ac \uc22b\uc790\ud615\ud0dc\uc5ec\uc57c \ud569\ub2c8\ub2e4.

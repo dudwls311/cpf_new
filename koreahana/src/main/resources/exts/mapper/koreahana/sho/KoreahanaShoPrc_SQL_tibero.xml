@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.sho.KoreahanaShoPrc">
+		
+	<sql id="KoreahanaShoPrcWhere">
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_STTS_CD = #{sprtSttsCd}
+		<if test='pbancrcSn != null and !pbancrcSn.equals("")'>
+			AND s.PBANCRC_SN = #{pbancrcSn}
+		</if>
+		<if test='sprtSn != null and !sprtSn.equals("")'>
+			AND s.SPRT_SN = #{sprtSn}
+		</if>
+		<if test='"Y".equals(searchNtkYn)'>			<!-- 북한이탈주민만 -->
+			AND ma.NTKRDF_UNQ_NO IS NOT NULL
+		</if>		
+		<if test='"N".equals(searchNtkYn)'>			<!-- 제3국출생만 -->
+			AND ma.NTKRDF_UNQ_NO IS NULL
+		</if>
+		<if test='searchSholSlctnType != null and !searchSholSlctnType.equals("")'>			<!-- 장학금유형 -->
+			AND (ss.SHOL_SLCTN_TYPE LIKE 'ntkrdf'||#{searchSholSlctnType}||'%' OR ss.SHOL_SLCTN_TYPE LIKE 'thirdcnty'||#{searchSholSlctnType}||'%')
+		</if>		
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>	<!-- 전체 -->
+					AND s.FLNM = FN_CRYPTO_ENC(#{searchKeyword},'${scrKey}')
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaShoPrcColumn">
+		sspm.SHOL_SPRT_PRCN_MNG_SN		sholSprtPrcnMngSn		,
+		sspm.SLCTN_MTHD_CD		slctnMthdCd		,
+		sspm.SLCTN_MMT_CD		slctnMmtCd		,
+		sspm.FNCRSC_CD		fncrscCd		,
+		sspm.GIVE_YMD		giveYmd		,
+		sspm.SHOL_GIVE_AMT		sholGiveAmt		,
+		sspm.RMRK		rmrk		,
+		
+
+		s.SPRT_SN	sprtSn		,
+		FN_CRYPTO_DEC(s.FLNM,'${scrKey}')		flnm		,
+		s.GENDER_CD	genderCd	,
+		FN_CRYPTO_DEC(s.BRDT_YMD,'${scrKey}')	brdtYmd		,
+		FN_CRYPTO_DEC(s.MBPHNO,'${scrKey}')		mbphno		,
+		FN_CRYPTO_DEC(s.ZIP,'${scrKey}')		zip		,
+		FN_CRYPTO_DEC(s.ADDR,'${scrKey}')		addr		,
+		FN_CRYPTO_DEC(s.DADDR,'${scrKey}')		daddr		,
+		s.SPRT_STTS_CD		sprtSttsCd		,
+		s.RSN		rsn		,        
+		s.RGTR_ID             rgtrId  ,
+		s.MDFR_ID            mdfrId ,
+		s.REG_DT                regDt    ,
+		s.MDFCN_DT               mdfcnDt   ,
+		
+		ss.NTKRDF_OPTR_CD		ntkrdfOptrCd		,
+		ss.NTKRDF_HANAWON_TH		ntkrdfHanawonTh		,
+		ss.NTKRDF_OPTR_ENTRY_YR		ntkrdfOptrEntryYr		,
+		ss.NTKRDF_ACRTFCT_FILE_SN		ntkrdfAcrtfctFileSn		,
+		ss.SHOL_SLCTN_TYPE		sholSlctnType		,
+		ss.SGNT_FILE_SN		sgntFileSn		,
+		FN_CRYPTO_DEC(ss.SGNTR_FLNM,'${scrKey}')		sgntrFlnm		,
+        
+		FN_CRYPTO_DEC(ma.NTKRDF_UNQ_NO,'${scrKey}')		ntkrdfUnqNo ,
+		ma.HANAWON_TH		hanawonTh		,
+		ma.ENTCNY_YMD			entcnyYmd	,
+		ma.PRTDCS_YMD			prtdcsYmd	,
+		ma.HANAWON_FNSH_YMD	hanawonFnshYmd	,
+        
+        p.PBANCRC_SN		pbancrcSn		,
+		p.PBANCRC_CTGRY_FRST_CD		pbancrcCtgryFrstCd		,
+		p.BIZ_SE_CD       bizSeCd    ,
+		p.RLS_YN          rlsYn      ,
+		p.PBANCRC_NM		pbancrcNm		,
+		p.PBANCRC_CN		pbancrcCn		,
+		p.INQ_CNT		inqCnt		,
+		p.PBANCRC_BGNG_DT		pbancrcBgngDt ,
+		p.PBANCRC_END_DT		pbancrcEndDt ,
+		FN_GET_PBANCRC_STTS(p.PBANCRC_BGNG_DT, p.PBANCRC_END_DT) pbancrcSttsCd
+	</sql>
+	<sql id="KoreahanaShoPrcTable">
+	    TB_SPRT s 
+	    LEFT JOIN TB_SHOL_SPRT ss ON (s.SPRT_SN = ss.SPRT_SN)
+	    LEFT JOIN TB_SHOL_SPRT_PRCN_MNG sspm ON (s.SPRT_SN = sspm.SPRT_SN AND sspm.DEL_YN = 'N')
+	    INNER JOIN TB_PBANCRC p ON (p.PBANCRC_SN = s.PBANCRC_SN AND p.DEL_YN = 'N')
+	    LEFT JOIN TB_MBR_ADTIFM ma ON (s.RGTR_ID = ma.MBR_ID)
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.sho.vo.KoreahanaShoPrcVO" resultType="exts.koreahana.sho.vo.KoreahanaShoPrcVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaShoPrcColumn"/>
+				FROM
+					<include refid="KoreahanaShoPrcTable"/>
+				<include refid="KoreahanaShoPrcWhere"/>
+				ORDER BY
+					s.SPRT_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.sho.vo.KoreahanaShoPrcVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaShoPrcTable"/>
+		<include refid="KoreahanaShoPrcWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.sho.vo.KoreahanaShoPrcVO" resultType="exts.koreahana.sho.vo.KoreahanaShoPrcVO">
+		SELECT
+			<include refid="KoreahanaShoPrcColumn"/>
+		FROM
+			<include refid="KoreahanaShoPrcTable"/>
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.SPRT_SN = #{sprtSn}
+		<if test='sprtSttsCd != null and !sprtSttsCd.equals("")'>
+			AND s.SPRT_STTS_CD = #{sprtSttsCd}
+		</if>
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.sho.vo.KoreahanaShoPrcVO">
+		<selectKey resultType="string" keyProperty="sholSprtPrcnMngSn" order="BEFORE">
+			SELECT SEQ_TB_SHOL_SPRT_PRCN_MNG.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_SHOL_SPRT_PRCN_MNG (
+			SHOL_SPRT_PRCN_MNG_SN		,
+			SPRT_SN		,
+			SLCTN_MTHD_CD		,
+			SLCTN_MMT_CD		,
+			FNCRSC_CD		,
+			GIVE_YMD		,
+			SHOL_GIVE_AMT		,
+			RMRK		,
+
+			RGTR_ID     ,
+			MDFR_ID       ,
+			REG_DT        ,
+			MDFCN_DT        ,
+			DEL_YN
+		) VALUES (
+			#{sholSprtPrcnMngSn}		,
+			#{sprtSn}		,
+			#{slctnMthdCd}		,
+			#{slctnMmtCd}		,
+			#{fncrscCd}		,
+			REPLACE(REPLACE(#{giveYmd},'-',''),'.','')		,
+			#{sholGiveAmt}		,
+			#{rmrk}		,
+
+			#{rgtrId}   ,
+			#{mdfrId}     ,
+			SYSDATE     ,
+			SYSDATE     ,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.sho.vo.KoreahanaShoPrcVO">
+		UPDATE 
+			TB_SHOL_SPRT_PRCN_MNG
+		SET
+			SPRT_SN	=	#{sprtSn}		,
+			SLCTN_MTHD_CD	=	#{slctnMthdCd}		,
+			SLCTN_MMT_CD	=	#{slctnMmtCd}		,
+			FNCRSC_CD	=	#{fncrscCd}		,
+			GIVE_YMD	=	REPLACE(REPLACE(#{giveYmd},'-',''),'.','')		,
+			SHOL_GIVE_AMT	=	#{sholGiveAmt}		,
+			RMRK	=	#{rmrk}		,
+
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND SPRT_SN = #{sprtSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.sho.vo.KoreahanaShoPrcVO">
+		UPDATE
+			TB_SHOL_SPRT_PRCN_MNG
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND SHOL_SPRT_PRCN_MNG_SN = #{sholSprtPrcnMngSn}
+	</update>	
+	
+	<select id="selectListStatistic" parameterType="egovMap" resultType="egovMap">
+		SELECT
+			NVL2(ma.NTKRDF_UNQ_NO,'Y','N') NTKRDF_YN,
+			ss.SHOL_SLCTN_TYPE,
+			COUNT(ss.SHOL_SLCTN_TYPE) CNT,
+			SUM(sspm.SHOL_GIVE_AMT) SHOL_GIVE_AMT,
+			s.SPRT_STTS_CD
+		FROM
+			TB_SPRT s 
+			JOIN TB_SHOL_SPRT ss ON (s.SPRT_SN = ss.SPRT_SN)
+			JOIN TB_PBANCRC p ON (p.PBANCRC_SN = s.PBANCRC_SN AND p.DEL_YN = 'N')
+			LEFT JOIN TB_MBR_ADTIFM ma ON (s.RGTR_ID = ma.MBR_ID)
+			LEFT JOIN TB_SHOL_SPRT_PRCN_MNG sspm ON (s.SPRT_SN = sspm.SPRT_SN)
+		WHERE
+			s.DEL_YN = 'N'
+			AND s.PBANCRC_SN = #{pbancrcSn}
+			AND s.SPRT_STTS_CD != #{sprtSttsCd}
+		GROUP BY
+			NVL2(ma.NTKRDF_UNQ_NO,'Y','N'),
+			ss.SHOL_SLCTN_TYPE,
+			s.SPRT_STTS_CD
+			
+		
+	</select>
+	
+	<select id="selectListExcel" parameterType="exts.koreahana.sho.vo.KoreahanaShoPrcVO" resultType="exts.koreahana.sho.vo.KoreahanaShoPrcVO">
+		SELECT
+			<include refid="KoreahanaShoPrcColumn"/>
+			
+		FROM
+			<include refid="KoreahanaShoPrcTable"/>
+		<include refid="KoreahanaShoPrcWhere"/>
+		ORDER BY
+			s.SPRT_SN DESC
+	</select>
+</mapper>

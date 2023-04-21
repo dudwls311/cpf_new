@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.mdl.KoreahanaMdl">
+		
+	<sql id="KoreahanaMdlWhere">
+		WHERE
+			DEL_YN = 'N'
+		<if test='flnm != null and !flnm.equals("")'>
+			AND FLNM = FN_CRYPTO_ENC(#{flnm},'${scrKey}')
+		</if>
+		<if test='genderCd != null and !genderCd.equals("")'>
+			AND GENDER_CD = #{genderCd}
+		</if>
+		<if test='entcnyYm != null and !entcnyYm.equals("")'>
+			AND ENTCNY_YM = #{entcnyYm}
+		</if>
+		<if test='brdtYmd != null and !brdtYmd.equals("")'>
+			AND BRDT_YMD = FN_CRYPTO_ENC(#{brdtYmd},'${scrKey}')
+		</if>
+		<if test='sprtYear != null and !sprtYear.equals("")'>
+			AND SUBSTR(SPRT_YMD,1,4) = #{sprtYear}
+		</if>
+		<if test='dssSeCd != null and !dssSeCd.equals("")'>
+			AND DSS_SE_CD = #{dssSeCd}
+		</if>
+		<if test='sprtSeCd != null and !sprtSeCd.equals("")'>
+			AND SPRT_SE_CD = #{sprtSeCd}
+		</if>
+		
+		<!--
+		<if test='addr != null and !addr.equals("")'>
+			AND ADDR = #{addr}
+		</if>
+		<if test='telno != null and !telno.equals("")'>
+			AND TELNO = #{telno}
+		</if>
+		<if test='curePeriod != null and !curePeriod.equals("")'>
+			AND CURE_PERIOD = #{curePeriod}
+		</if>
+		<if test='hsptlNm != null and !hsptlNm.equals("")'>
+			AND HSPTL_NM = #{hsptlNm}
+		</if>
+		<if test='sprtAmt != null and !sprtAmt.equals("")'>
+			AND SPRT_AMT = #{sprtAmt}
+		</if>
+		<if test='sprtYmd != null and !sprtYmd.equals("")'>
+			AND SPRT_YMD = #{sprtYmd}
+		</if>
+		<if test='sprtSttsCd != null and !sprtSttsCd.equals("")'>
+			AND SPRT_STTS_CD = #{sprtSttsCd}
+		</if>
+		<if test='rsn != null and !rsn.equals("")'>
+			AND RSN = #{rsn}
+		</if>
+		<if test='dssNm != null and !dssNm.equals("")'>
+			AND DSS_NM = #{dssNm}
+		</if>
+
+		-->
+		
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>	<!-- 전체 -->
+					AND FLNM = FN_CRYPTO_ENC(#{searchKeyword},'${scrKey}')
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaMdlColumn">
+		MDLCR_SPRT_SN		mdlcrSprtSn		,
+		FN_CRYPTO_DEC(FLNM,'${scrKey}')		flnm		,
+		GENDER_CD		genderCd		,
+		ENTCNY_YM		entcnyYm		,
+		FN_CRYPTO_DEC(BRDT_YMD,'${scrKey}')		brdtYmd		,
+		FN_CRYPTO_DEC(ADDR,'${scrKey}')		addr		,
+		TELNO		telno		,
+		DSS_SE_CD		dssSeCd		,
+		CURE_PERIOD		curePeriod		,
+		HSPTL_NM		hsptlNm		,
+		SPRT_AMT		sprtAmt		,
+		SPRT_YMD		sprtYmd		,
+		SPRT_SE_CD		sprtSeCd		,
+		SPRT_STTS_CD		sprtSttsCd		,
+		RSN		rsn		,
+		DSS_NM		dssNm		,
+
+		RGTR_ID             rgtrId  ,
+		MDFR_ID            mdfrId ,
+		REG_DT                regDt    ,
+		MDFCN_DT               mdfcnDt   ,
+		DEL_YN                  delYn 
+	</sql>
+	<sql id="KoreahanaMdlTable">
+	    TB_MDLCR_SPRT
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.mdl.vo.KoreahanaMdlVO" resultType="exts.koreahana.mdl.vo.KoreahanaMdlVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaMdlColumn"/>
+				FROM
+					<include refid="KoreahanaMdlTable"/>
+				<include refid="KoreahanaMdlWhere"/>
+				ORDER BY
+					MDLCR_SPRT_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.mdl.vo.KoreahanaMdlVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaMdlTable"/>
+		<include refid="KoreahanaMdlWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.mdl.vo.KoreahanaMdlVO" resultType="exts.koreahana.mdl.vo.KoreahanaMdlVO">
+		SELECT
+			<include refid="KoreahanaMdlColumn"/>
+		FROM
+			<include refid="KoreahanaMdlTable"/>
+		WHERE
+			DEL_YN = 'N'
+			AND MDLCR_SPRT_SN = #{mdlcrSprtSn}
+	</select>
+	
+	<insert id="insert" parameterType="exts.koreahana.mdl.vo.KoreahanaMdlVO">
+		<selectKey resultType="string" keyProperty="mdlcrSprtSn" order="BEFORE">
+			SELECT SEQ_TB_MDLCR_SPRT.NEXTVAL FROM DUAL  			      
+		</selectKey>
+		INSERT INTO TB_MDLCR_SPRT (
+			MDLCR_SPRT_SN		,
+			FLNM		,
+			GENDER_CD		,
+			ENTCNY_YM		,
+			BRDT_YMD		,
+			ADDR		,
+			TELNO		,
+			DSS_SE_CD		,
+			CURE_PERIOD		,
+			HSPTL_NM		,
+			SPRT_AMT		,
+			SPRT_YMD		,
+			SPRT_SE_CD		,
+			SPRT_STTS_CD		,
+			RSN		,
+			DSS_NM		,
+
+			RGTR_ID     ,
+			MDFR_ID       ,
+			REG_DT        ,
+			MDFCN_DT        ,
+			DEL_YN
+		) VALUES (
+			#{mdlcrSprtSn}		,
+			FN_CRYPTO_ENC(#{flnm},'${scrKey}')		,
+			#{genderCd}		,
+			REPLACE(REPLACE(#{entcnyYm},'-',''),'.','')		,
+			FN_CRYPTO_ENC(REPLACE(REPLACE(#{brdtYmd},'-',''),'.',''),'${scrKey}')		,
+			FN_CRYPTO_ENC(#{addr},'${scrKey}')		,
+			#{telno}		,
+			#{dssSeCd}		,
+			#{curePeriod}		,
+			#{hsptlNm}		,
+			#{sprtAmt}		,
+			REPLACE(REPLACE(#{sprtYmd},'-',''),'.','')		,
+			#{sprtSeCd}		,
+			#{sprtSttsCd}		,
+			#{rsn}		,
+			#{dssNm}		,
+
+			#{rgtrId}   ,
+			#{mdfrId}     ,
+			SYSDATE     ,
+			SYSDATE     ,
+			'N'
+		)
+	</insert>
+	
+	<update id="update" parameterType="exts.koreahana.mdl.vo.KoreahanaMdlVO">
+		UPDATE 
+			TB_MDLCR_SPRT
+		SET
+			FLNM	=	FN_CRYPTO_ENC(#{flnm},'${scrKey}')		,
+			GENDER_CD	=	#{genderCd}		,
+			ENTCNY_YM	=	REPLACE(REPLACE(#{entcnyYm},'-',''),'.','')		,
+			BRDT_YMD	=	FN_CRYPTO_ENC(REPLACE(REPLACE(#{brdtYmd},'-',''),'.',''),'${scrKey}')		,
+			ADDR	=	FN_CRYPTO_ENC(#{addr},'${scrKey}')		,
+			TELNO	=	#{telno}		,
+			DSS_SE_CD	=	#{dssSeCd}		,
+			CURE_PERIOD	=	#{curePeriod}		,
+			HSPTL_NM	=	#{hsptlNm}		,
+			SPRT_AMT	=	#{sprtAmt}		,
+			SPRT_YMD	=	REPLACE(REPLACE(#{sprtYmd},'-',''),'.','')		,
+			SPRT_SE_CD	=	#{sprtSeCd}		,
+			SPRT_STTS_CD	=	#{sprtSttsCd}		,
+			RSN	=	#{rsn}		,
+			DSS_NM	=	#{dssNm}		,
+
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND MDLCR_SPRT_SN = #{mdlcrSprtSn}
+	</update>
+	
+	<update id="delete" parameterType="exts.koreahana.mdl.vo.KoreahanaMdlVO">
+		UPDATE
+			TB_MDLCR_SPRT
+		SET
+			DEL_YN             = 'Y'              ,
+			MDFR_ID       = #{mdfrId}    ,
+			MDFCN_DT          = SYSDATE
+		WHERE
+			1 = 1
+			AND MDLCR_SPRT_SN = #{mdlcrSprtSn}
+	</update>
+	
+	
+	<select id="selectStatistic" parameterType="exts.koreahana.mdl.vo.KoreahanaMdlVO" resultType="egovMap">
+		SELECT
+			'dssSeCd' GB,
+			COUNT(*) CNT,
+			SUBSTR(SPRT_YMD,5,2) MT,
+			DSS_SE_CD CD,	
+			SUM(SPRT_AMT) AMT
+		FROM
+			TB_MDLCR_SPRT
+		WHERE
+			DEL_YN = 'N'
+			AND SUBSTR(SPRT_YMD,1,4) = #{sprtYear}
+		GROUP BY
+			DSS_SE_CD, 
+			SUBSTR(SPRT_YMD,5,2)
+	UNION ALL
+		SELECT
+			'sprtSeCd' GB,
+			COUNT(*) CNT,
+			SUBSTR(SPRT_YMD,5,2) MT,
+			SPRT_SE_CD CD,	
+			SUM(SPRT_AMT) AMT
+		FROM
+			TB_MDLCR_SPRT
+		WHERE
+			DEL_YN = 'N'
+			AND SUBSTR(SPRT_YMD,1,4) = #{sprtYear}
+		GROUP BY
+			SPRT_SE_CD, 
+			SUBSTR(SPRT_YMD,5,2)
+	UNION ALL
+		SELECT
+			'total' GB,
+			COUNT(*) CNT,
+			SUBSTR(SPRT_YMD,5,2) MT,
+			'' CD,	
+			SUM(SPRT_AMT) AMT
+		FROM
+			TB_MDLCR_SPRT
+		WHERE
+			DEL_YN = 'N'
+			AND SUBSTR(SPRT_YMD,1,4) = #{sprtYear}
+		GROUP BY
+			SUBSTR(SPRT_YMD,5,2)
+	</select>	
+</mapper>

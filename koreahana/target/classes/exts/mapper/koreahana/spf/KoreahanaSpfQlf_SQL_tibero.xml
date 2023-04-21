@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="exts.mapper.koreahana.spf.KoreahanaSpfQlf">
+		
+	<sql id="KoreahanaSpfQlfWhere">
+		WHERE
+			1 = 1
+		<!--
+		<if test='pbancrcSn != null and !pbancrcSn.equals("")'>
+			AND PBANCRC_SN = #{pbancrcSn}
+		</if>
+		<if test='testPlc != null and !testPlc.equals("")'>
+			AND TEST_PLC = #{testPlc}
+		</if>
+		<if test='testYmd != null and !testYmd.equals("")'>
+			AND TEST_YMD = #{testYmd}
+		</if>
+		<if test='testHrInfo != null and !testHrInfo.equals("")'>
+			AND TEST_HR_INFO = #{testHrInfo}
+		</if>
+		<if test='sccdPrsntnYmd != null and !sccdPrsntnYmd.equals("")'>
+			AND SCCD_PRSNTN_YMD = #{sccdPrsntnYmd}
+		</if>
+
+		-->
+		
+		<if test='searchKeyword != null and !searchKeyword.equals("")'>
+			<choose>
+				<when test='"0".equals(searchCondition)'>	<!-- 전체 -->
+					AND PBANCRC_SN LIKE '%'||#{searchKeyword}||'%'
+				</when>
+				<when test='"1".equals(searchCondition)'>	<!-- 제목 -->
+					AND PBANCRC_SN LIKE '%'||#{searchKeyword}||'%'
+				</when>
+				<when test='"2".equals(searchCondition)'>	<!-- 내용 -->
+					
+				</when>
+			</choose>
+		</if>
+	</sql>
+	<sql id="KoreahanaSpfQlfColumn">
+		PBANCRC_SN		pbancrcSn		,
+		TEST_PLC		testPlc		,
+		TEST_YMD		testYmd		,
+		TEST_HR_INFO		testHrInfo		,
+		SCCD_PRSNTN_YMD		sccdPrsntnYmd
+	</sql>
+	<sql id="KoreahanaSpfQlfTable">
+	    TB_SPFST_QLFC_TEST_INFO
+	</sql>
+	<select id="selectList" parameterType="exts.koreahana.spf.vo.KoreahanaSpfQlfVO" resultType="exts.koreahana.spf.vo.KoreahanaSpfQlfVO">
+	
+		<if test="recordCountPerPage != 0">
+		SELECT  
+			*
+		FROM  (
+		</if>
+		
+			SELECT 
+				ROWNUM RNUM, ALL_LIST.*
+			FROM  (
+			
+				SELECT
+					<include refid="KoreahanaSpfQlfColumn"/>
+				FROM
+					<include refid="KoreahanaSpfQlfTable"/>
+				<include refid="KoreahanaSpfQlfWhere"/>
+				ORDER BY
+					PBANCRC_SN DESC
+			)ALL_LIST
+			
+		<if test='recordCountPerPage != 0'>
+		) Z
+		WHERE  
+			RNUM  &gt; #{firstIndex}
+			AND  RNUM &lt;= #{firstIndex} + #{recordCountPerPage}
+		</if>
+		
+	</select>
+	<select id="selectTot" parameterType="exts.koreahana.spf.vo.KoreahanaSpfQlfVO" resultType="Integer">
+		SELECT
+			COUNT(*) AS TOTAL
+		FROM
+			<include refid="KoreahanaSpfQlfTable"/>
+		<include refid="KoreahanaSpfQlfWhere"/>
+	</select>
+	
+	
+	<select id="select" parameterType="exts.koreahana.spf.vo.KoreahanaSpfQlfVO" resultType="exts.koreahana.spf.vo.KoreahanaSpfQlfVO">
+		SELECT
+			<include refid="KoreahanaSpfQlfColumn"/>
+		FROM
+			<include refid="KoreahanaSpfQlfTable"/>
+		WHERE
+			PBANCRC_SN = #{pbancrcSn}
+	</select>
+	
+	<insert id="merge" parameterType="exts.koreahana.spf.vo.KoreahanaSpfQlfVO">
+		MERGE INTO
+			TB_SPFST_QLFC_TEST_INFO 
+			USING dual
+				ON (PBANCRC_SN = #{pbancrcSn})
+			WHEN MATCHED THEN
+				UPDATE
+				SET 
+					TEST_PLC	=	#{testPlc}		,
+					TEST_YMD	=	REPLACE(#{testYmd}, '-', '')		,
+					TEST_HR_INFO	=	#{testHrInfo}		,
+					SCCD_PRSNTN_YMD	=	REPLACE(#{sccdPrsntnYmd}, '-', '')
+			WHEN NOT MATCHED THEN
+				INSERT (
+					PBANCRC_SN		,
+					TEST_PLC		,
+					TEST_YMD		,
+					TEST_HR_INFO		,
+					SCCD_PRSNTN_YMD
+				) VALUES (
+					#{pbancrcSn}		,
+					#{testPlc}		,
+					REPLACE(#{testYmd}, '-', '')		,
+					#{testHrInfo}		,
+					REPLACE(#{sccdPrsntnYmd}, '-', '')
+				)
+		
+	</insert>
+</mapper>
